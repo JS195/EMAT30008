@@ -12,5 +12,14 @@ def solve_to(f,x0,t0,t1,dt_max):
         step = euler_step(f, x[-1], t[-1], dt)
         t.append(t[-1]+dt)
         x.append(step)
-    return x, t
+    return np.array(x), np.array(t)
 
+# Testing solve_to
+x0 = 1
+t0 = 0
+t1 = 1
+dt_max = 0.1
+def func(x, t): 
+    return x
+ans, t = solve_to(func, x0, t0, t1, dt_max)
+print(ans[-1],t[-1])
