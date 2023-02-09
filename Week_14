@@ -16,7 +16,7 @@ def solve_to(f,x0,t0,t1,dt_max):
         x.append(step)
     return np.array(x), np.array(t)
 
-# Testing solve_to
+# Calculating errors for a range of dt
 def func(x, t): 
     return x
 errors = []
@@ -30,6 +30,14 @@ for i in range(35):
     errors.append(error)
     dt_max = dt_max*1.5
 print(ans[-1],t[-1])
+
+#Plotting the errors
+tstep = np.linspace(0.000001, 1, 35)
+plt.plot(tstep, errors,'r')
+plt.xlabel('tstep')
+plt.ylabel('absolute error')
+plt.title('Size of Timestep Against Error Produced from the Euler Method')
+plt.show()
 
 
 
