@@ -33,10 +33,10 @@ print(ans[-1],t[-1])
 
 #Plotting the errors
 tstep = np.linspace(0.000001, 1, 35)
-plt.plot(tstep, errors,'r')
-plt.xlabel('tstep')
-plt.ylabel('absolute error')
-plt.title('Size of Timestep Against Error Produced from the Euler Method')
+plt.loglog(tstep, errors,'r')
+plt.xlabel('log(tstep)')
+plt.ylabel('log(absolute error)')
+plt.title('A Loglog Graph of Timestep Size Against Error Produced from the Euler Method')
 plt.show()
 
 
