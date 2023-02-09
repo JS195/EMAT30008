@@ -35,36 +35,35 @@ for i in range(20):
 print(ans[-1],t[-1])
 
 #Plotting the errors
-tstep = np.linspace(0.000001, 1, 20)
-plt.loglog(tstep, errors,'r')
-plt.xlabel('log(tstep)')
-plt.ylabel('log(absolute error)')
-plt.title('A Loglog Graph of Timestep Size Against Error Produced from the Euler Method')
-plt.show()
+#tstep = np.linspace(0.000001, 1, 20)
+#plt.loglog(tstep, errors,'r')
+#plt.xlabel('log(tstep)')
+#plt.ylabel('log(absolute error)')
+#plt.title('A Loglog Graph of Timestep Size Against Error Produced from the Euler Method')
+#plt.show()
 
 #PART 2
 def RK4_step(f, x, t, h):
     k1 = h * f(x, t)
-    k2 = h * f(x + 0.5 * h, t + 0.5 * k1)
-    k3 = h * f(x + 0.5 * h, t + 0.5 * k2)
+    k2 = h * f(x + h/2, t + k1/2)
+    k3 = h * f(x + h/2, t + k2/2)
     k4 = h * f(x + h, t + k3)
-    x_step = x + (k1 + 2 * k2 + 2 * k3 + k4) / 6
-    t_step = t + h
-    return x_step, t_step
+    x_new = x + (k1 + 2 * k2 + 2 * k3 + k4) / 6
+    t_new = t + h
+    return x_new, t_new
 
-def RK4(f, x0, t0, h, n):
+def RK4(f, x0, t0, h):
     t = t0
     x = x0
+    n = int(1/h)
     for i in range(n):
         x, t = RK4_step(f, x, t, h)
     return x, t
 
 def f(x, t):
     return x
-
 t0 = 0
 x0 = 1
 h = 0.00001
-n = 100000
-x, t = RK4(f, x0, t0, h, n)
+x, t = RK4(f, x0, t0, h)
 print(x, t)
