@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt
+import math
 
 def euler_step(f,x,t,dt):
     step = x+dt*f(x,t)
@@ -15,11 +17,19 @@ def solve_to(f,x0,t0,t1,dt_max):
     return np.array(x), np.array(t)
 
 # Testing solve_to
+def func(x, t): 
+    return x
+errors = []
 x0 = 1
 t0 = 0
 t1 = 1
-dt_max = 0.1
-def func(x, t): 
-    return x
-ans, t = solve_to(func, x0, t0, t1, dt_max)
+dt_max = 0.000001
+for i in range(35):
+    ans, t = solve_to(func, x0, t0, t1, dt_max)
+    error = abs(math.e-ans[-1])
+    errors.append(error)
+    dt_max = dt_max*1.5
 print(ans[-1],t[-1])
+
+
+
