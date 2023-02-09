@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import math
 
 #PART 1
-
 def euler_step(f,x,t,dt):
     step = x+dt*f(x,t)
     return step
@@ -17,7 +16,6 @@ def solve_to(f,x0,t0,t1,dt_max):
         t.append(t[-1]+dt)
         x.append(step)
     return np.array(x), np.array(t)
-
 
 # Calculating errors for a range of dt
 def func(x, t): 
@@ -52,6 +50,7 @@ def RK4_step(f, x, t, h):
     t_new = t + h
     return x_new, t_new
 
+#Updated solve_to function
 def solve_to(f,x0,t0,t1,h,solver=''):
     if solver == 'euler':
         t=[t0]
@@ -77,3 +76,36 @@ x0 = 1
 h = 0.00001
 x= solve_to(f, x0, t0, t1, h, 'rk4')
 print(x)
+
+# Plotting the error of the Euler method against the error of the RK4 method
+errorsEuler = []
+errorsRK4 = []
+def func(x, t): 
+    return x
+x0 = 1
+t0 = 0
+t1 = 1
+h = 0.000001
+for i in range(35):
+    ans, t = solve_to(func, x0, t0, t1, h, 'euler')
+    error = abs(math.e-ans)
+    errorsEuler.append(error)
+    h = h*1.5
+print(ans,t)
+
+h = 0.000001
+for i in range(35):
+    ans, t = solve_to(func, x0, t0, t1, h,'rk4')
+    error = abs(math.e-ans)
+    errorsRK4.append(error)
+    h = h*1.5
+print(ans,t)
+
+tstep = np.linspace(0.000001,0.0001,35)
+plt.loglog(tstep, errorsEuler,'r', label = "Euler")
+plt.loglog(tstep,errorsRK4, 'b', label = "RK4")
+plt.xlabel('tstep')
+plt.ylabel('absolute error')
+plt.title('Size of Timestep Against Error Produced from the RK4 and Euler Methods')
+plt.legend()
+plt.show()
