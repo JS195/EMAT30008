@@ -1,0 +1,3 @@
+def euler_step(f,x,t,dt):
+    step = x+dt*f(x,t)
+    return step
