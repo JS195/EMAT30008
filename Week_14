@@ -53,14 +53,13 @@ def RK4_step(f, x, t, h):
 #Updated solve_to function
 def solve_to(f,x0,t0,t1,h,solver=''):
     if solver == 'euler':
-        t=[t0]
-        x=[x0]
-        while t[-1] < t1:
-            dt = min(dt_max, t1 - t[-1])
-            step = euler_step(f, x[-1], t[-1], dt)
-            t.append(t[-1]+dt)
-            x.append(step)
-        return x[-1],t[-1]
+        t=t0
+        x=x0
+        while t < t1:
+            dt = min(h, t1 - t)
+            x = euler_step(f,x,t,dt)
+            t = t + dt
+        return x, t
     if solver == 'rk4':
         t = t0
         x = x0
