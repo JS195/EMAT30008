@@ -18,6 +18,7 @@ def solve_to(f,x0,t0,t1,dt_max):
         x.append(step)
     return np.array(x), np.array(t)
 
+
 # Calculating errors for a range of dt
 def func(x, t): 
     return x
@@ -26,7 +27,7 @@ x0 = 1
 t0 = 0
 t1 = 1
 dt_max = 0.000001
-for i in range(35):
+for i in range(20):
     ans, t = solve_to(func, x0, t0, t1, dt_max)
     error = abs(math.e-ans[-1])
     errors.append(error)
@@ -34,7 +35,7 @@ for i in range(35):
 print(ans[-1],t[-1])
 
 #Plotting the errors
-tstep = np.linspace(0.000001, 1, 35)
+tstep = np.linspace(0.000001, 1, 20)
 plt.loglog(tstep, errors,'r')
 plt.xlabel('log(tstep)')
 plt.ylabel('log(absolute error)')
@@ -42,14 +43,28 @@ plt.title('A Loglog Graph of Timestep Size Against Error Produced from the Euler
 plt.show()
 
 #PART 2
-def RK4(f,t0,x0,h):
+def RK4_step(f, x, t, h):
+    k1 = h * f(x, t)
+    k2 = h * f(x + 0.5 * h, t + 0.5 * k1)
+    k3 = h * f(x + 0.5 * h, t + 0.5 * k2)
+    k4 = h * f(x + h, t + k3)
+    x_step = x + (k1 + 2 * k2 + 2 * k3 + k4) / 6
+    t_step = t + h
+    return x_step, t_step
+
+def RK4(f, x0, t0, h, n):
     t = t0
     x = x0
-    for i in range (2):
-        k1 = h*f(t,x)
-        k2 = h * (f(t + 0.5 * h, x + 0.5 * k1))
-        k3 = h * (f(t + 0.5 * h, x + 0.5 * k2))
-        k4 = h*(f(t+h, x+k3))
-        x = x+(k1+2*k2+2*k3+k4)/6
-        t = t+1
-    return(x)
+    for i in range(n):
+        x, t = RK4_step(f, x, t, h)
+    return x, t
+
+def f(x, t):
+    return x
+
+t0 = 0
+x0 = 1
+h = 0.00001
+n = 100000
+x, t = RK4(f, x0, t0, h, n)
+print(x, t)
