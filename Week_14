@@ -52,18 +52,28 @@ def RK4_step(f, x, t, h):
     t_new = t + h
     return x_new, t_new
 
-def RK4(f, x0, t0, h):
-    t = t0
-    x = x0
-    n = int(1/h)
-    for i in range(n):
-        x, t = RK4_step(f, x, t, h)
-    return x, t
+def solve_to(f,x0,t0,t1,h,solver=''):
+    if solver == 'euler':
+        t=[t0]
+        x=[x0]
+        while t[-1] < t1:
+            dt = min(dt_max, t1 - t[-1])
+            step = euler_step(f, x[-1], t[-1], dt)
+            t.append(t[-1]+dt)
+            x.append(step)
+        return x[-1],t[-1]
+    if solver == 'rk4':
+        t = t0
+        x = x0
+        n = int((t1-t0)/h)
+        for i in range(n):
+             x, t = RK4_step(f, x, t, h)
+        return x,t
 
 def f(x, t):
     return x
 t0 = 0
 x0 = 1
 h = 0.00001
-x, t = RK4(f, x0, t0, h)
-print(x, t)
+x= solve_to(f, x0, t0, t1, h, 'rk4')
+print(x)
