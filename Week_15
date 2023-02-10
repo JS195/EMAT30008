@@ -1,8 +1,25 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.integrate import solve_ivp
 
-a =1
-d=0.1
+def predator_prey(X, t, pars):
+    x = X[0]
+    y = X[1]
+    a, b, d = pars[0], pars[1], pars[2]
+    dxdt = x * (1 - x) - (a * x * y) / (d + x)
+    dydt = b * y * (1 - (y / x))
+    return np.array([dxdt, dydt])
 
-dxdt = x * (1 - x) - ((a*x*y)/(d+x))
-dydt = b*y*(1-y/x)
+a = 1.0
+b = 0.3
+d = 0.1
+pars = [a, b, d]
+
+X0 = [1, 1]
+t = np.linspace(0, 10, 100)
+sol = solve_ivp(fun=lambda t, X: predator_prey(X, t, pars), t_span=[0, 10], y0=X0, t_eval=t)
+plt.plot(sol.t, sol.y[0], label='prey population')
+plt.plot(sol.t, sol.y[1], label='predator population')
+plt.legend()
+plt.show()
+
