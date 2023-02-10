@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import time
 
 #PART 1
 def euler_step(f,x,t,dt):
@@ -108,3 +109,20 @@ plt.ylabel('absolute error')
 plt.title('Size of Timestep Against Error Produced from the RK4 and Euler Methods')
 plt.legend()
 plt.show()
+
+def func(x, t): 
+    return x
+x0 = 1
+t0 = 0
+t1 = 1
+h=0.00001
+
+start_timeEuler = time.perf_counter()
+ansEuler, tEuler = solve_to(func, x0, t0, t1, h, 'euler')
+end_timeEuler = time.perf_counter()
+
+start_timeRK4 = time.perf_counter()
+ansRK4, tRK4 = solve_to(func, x0, t0, t1, h,'rk4')
+end_timeRK4 = time.perf_counter()
+
+print(end_timeEuler, end_timeRK4)
