@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
+from scipy.optimize import root
 
+# Predator-prey function
 def predator_prey(X, t, pars):
     x = X[0]
     y = X[1]
@@ -10,16 +12,52 @@ def predator_prey(X, t, pars):
     dydt = b * y * (1 - (y / x))
     return np.array([dxdt, dydt])
 
+# Values in the predtor-prey function
 a = 1.0
 b = 0.3
 d = 0.1
 pars = [a, b, d]
 
+# Behaviour in the long-time limit
 X0 = [1, 1]
-t = np.linspace(0, 10, 100)
-sol = solve_ivp(fun=lambda t, X: predator_prey(X, t, pars), t_span=[0, 10], y0=X0, t_eval=t)
+t = np.linspace(0, 100, 1000)
+sol = solve_ivp(fun=lambda t, X: predator_prey(X, t, pars), t_span=[0, 100], y0=X0, t_eval=t)
+plt.plot(sol.t, sol.y[0], label='prey population')
+plt.plot(sol.t, sol.y[1], label='predator population')
+#plt.legend()
+#plt.show()
+
+# Isolate a periodic orbit
+def shooting(f):
+    def G(u0T, phase_con, *pars):
+        def F(u0, T):
+            t_eval = np.linspace(0, T, 1000)
+            sol = solve_ivp(fun=lambda t, X: f(X, t, pars), t_span=[0, T], y0=u0, t_eval=t_eval, rtol=1e-8, atol=1e-8)
+            return sol.y[:, -1]
+        T, u0 = u0T[-1], u0T[:-1]
+        return np.append(u0 - F(u0, T), phase_con(u0, *pars))
+    return G
+
+#Determine the phase conditions
+def phase_condition(u0, *pars):
+    T = 10  # guess for the period
+    t_eval = np.linspace(0, T, 1000)
+    sol = solve_ivp(fun=lambda t, X: predator_prey(X, t, pars), t_span=[0, T], y0=u0, t_eval=t_eval, rtol=1e-8, atol=1e-8)
+    return sol.y[:, 0] - sol.y[:, -1]
+
+a = 1.0
+b = 0.3
+d = 0.1
+u0_guess = [1, 1, 10]
+G = shooting(predator_prey)
+sol = root(fun=G, x0=u0_guess, args=(phase_condition, a, b, d))
+u0 = sol.x[:-1]
+T = sol.x[-1]
+print("Starting conditions: ", u0)
+print("Period: ", T)
+t_eval = np.linspace(0, T, 1000)
+sol = solve_ivp(fun=lambda t, X: predator_prey(X, t, [a, b, d]), t_span=[0, T], y0=u0, t_eval=t_eval, rtol=1e-8, atol=1e-8)
 plt.plot(sol.t, sol.y[0], label='prey population')
 plt.plot(sol.t, sol.y[1], label='predator population')
 plt.legend()
 plt.show()
-
