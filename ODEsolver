@@ -62,17 +62,13 @@ def timing(f, x0, t0, t1):
     tic = time.perf_counter()
     n=0
     while n<1000:
-        ans1, t1 = solve_to(f, x0, t0, t1, (10**-3), 'euler')
+        ans1, t1 = solve_to(f, x0, t0, t1, 0.001, 'euler')
         n = n+1
     toc = time.perf_counter()
     tic1 = time.perf_counter()
     n=0
     while n<1000:
-        ans2, t2 = solve_to(f, x0, t0, t1, 1,'rk4')
+        ans2, t2 = solve_to(f, x0, t0, t1, 10,'rk4')
         n=n+1
     toc1 = time.perf_counter()
     return(toc-tic, toc1-tic1)
-
-def func(x,t):
-    return x
-timing(func, x0=1,t0=0,t1=1)
