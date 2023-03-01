@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import solve_ivp
-from scipy.optimize import root
+from ODEsolver import solve_odes
 
 # Predator-prey function
 def predator_prey(X, t, a=1.0, b=0.25, d=0.1):
@@ -11,4 +10,11 @@ def predator_prey(X, t, a=1.0, b=0.25, d=0.1):
     dydt = b * y * (1 - (y / x))
     return np.array([dxdt, dydt])
 
-
+# Plotting the predator prey model over time
+X0 = [1, 1]
+n = np.linspace(0, 200, 1000)
+sol = solve_odes(f=lambda t, X: predator_prey(X, t, a=1.0, b=0.25, d=0.1), x0=X0, t0=0, t1=200, h=0.1, solver='rk4')
+plt.plot(sol[1], sol[0][0], label='prey population')
+plt.plot(sol[1], sol[0][1], label='predator population')
+plt.legend()
+plt.show()
