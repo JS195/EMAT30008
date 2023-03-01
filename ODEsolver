@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import time
 
 #Euler step
 def euler_step(f,x,t,dt):
@@ -23,43 +24,55 @@ def solve_to(f,x0,t0,t1,h,solver=''):
     t=t0
     x=x0
     while t < t1:
-      dt = min(h, t1 - t)
-      if solver == 'euler':
-        x_new,t_new = euler_step(f,x,t,dt)
-      elif solver == 'rk4':
-        x_new,t_new = RK4_step(f, x, t, dt)
-      x=x_new
-      t=t_new
-    return x, t
+        dt = min(h, t1 - t)
+        if solver == 'euler':
+            x_new,t_new = euler_step(f,x,t,dt)
+        elif solver == 'rk4':
+            x_new,t_new = RK4_step(f, x, t, dt)
+        x = x_new
+        t = t_new
+    return x_new, t_new
 
-errorsEuler = []
-errorsRK4 = []
-def func(x, t): 
+# Errors of the two methods plotted on the same graph
+def errors(f, h, x0, t0, t1):
+    errorsEuler = []
+    errorsRK4 = []
+    d=h
+
+    for i in range(1000):
+        ans1, t1 = solve_to(f, x0, t0, t1, d, 'euler')
+        error1 = abs(math.e-ans1)
+        errorsEuler.append(error1)
+        ans2, t2 = solve_to(f, x0, t0, t1, d,'rk4')
+        error2 = abs(math.e-ans2)
+        errorsRK4.append(error2)
+        d = d+h
+
+    tstep = np.linspace(h,d,1000)
+    plt.loglog(tstep, errorsEuler,'r', label = "Euler")
+    plt.loglog(tstep, errorsRK4, 'b', label = "RK4")
+    plt.xlabel('log(tstep)')
+    plt.ylabel('log(absolute error)')
+    plt.title('Size of Timestep Against Error Produced from the RK4 and Euler Methods')
+    plt.legend()
+    plt.show()
+
+#Time taken for the two methods over 1000 iterations
+def timing(f, x0, t0, t1):
+    tic = time.perf_counter()
+    n=0
+    while n<1000:
+        ans1, t1 = solve_to(f, x0, t0, t1, (10**-3), 'euler')
+        n = n+1
+    toc = time.perf_counter()
+    tic1 = time.perf_counter()
+    n=0
+    while n<1000:
+        ans2, t2 = solve_to(f, x0, t0, t1, 1,'rk4')
+        n=n+1
+    toc1 = time.perf_counter()
+    return(toc-tic, toc1-tic1)
+
+def func(x,t):
     return x
-x0 = 1
-t0 = 0
-t1 = 1
-h = 0.001
-d=h
-
-for i in range(1000):
-    ans, t = solve_to(func, x0, t0, t1, d, 'euler')
-    error = abs(math.e-ans)
-    errorsEuler.append(error)
-    d = d+h
-
-d = 0.001
-for i in range(1000):
-    ans, t = solve_to(func, x0, t0, t1, d,'rk4')
-    error = abs(math.e-ans)
-    errorsRK4.append(error)
-    d=d+h
-
-tstep = np.linspace(h,d,1000)
-plt.loglog(tstep, errorsEuler,'r', label = "Euler")
-plt.loglog(tstep, errorsRK4, 'b', label = "RK4")
-plt.xlabel('log(tstep)')
-plt.ylabel('log(absolute error)')
-plt.title('Size of Timestep Against Error Produced from the RK4 and Euler Methods')
-plt.legend()
-plt.show()
+timing(func, x0=1,t0=0,t1=1)
