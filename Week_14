@@ -34,12 +34,12 @@ for i in range(20):
 print(ans[-1],t[-1])
 
 #Plotting the errors
-#tstep = np.linspace(0.000001, 1, 20)
-#plt.loglog(tstep, errors,'r')
-#plt.xlabel('log(tstep)')
-#plt.ylabel('log(absolute error)')
-#plt.title('A Loglog Graph of Timestep Size Against Error Produced from the Euler Method')
-#plt.show()
+tstep = np.linspace(0.000001, 1, 20)
+plt.loglog(tstep, errors,'r')
+plt.xlabel('log(tstep)')
+plt.ylabel('log(absolute error)')
+plt.title('A Loglog Graph of Timestep Size Against Error Produced from the Euler Method')
+plt.show()
 
 #PART 2
 def RK4_step(f, x, t, h):
