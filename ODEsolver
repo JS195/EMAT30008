@@ -33,6 +33,23 @@ def solve_to(f,x0,t0,t1,h,solver=''):
         t = t_new
     return x_new, t_new
 
+# Solve a system of ODEs taking input as either 'Euler' or 'RK4'
+def solve_odes(f, x0, t0, t1, h, solver='euler'):
+    t = t0
+    x = np.array(x0)
+    n = int((t1 - t0) / h)
+    sol = np.zeros((n+1, len(x0)))
+    sol[0] = x
+    for i in range(n):
+        dt = min(h, t1 - t)
+        if solver == 'euler':
+            x, t = euler_step(f, x, t, dt)
+        elif solver == 'rk4':
+            x, t = RK4_step(f, x, t, dt)
+        sol[i+1] = x
+    return sol.T, np.linspace(t0, t1, n+1)
+
+
 # Errors of the two methods plotted on the same graph
 def errors(f, h, x0, t0, t1):
     errorsEuler = []
