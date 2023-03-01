@@ -11,10 +11,10 @@ def predator_prey(X, t, a=1.0, b=0.25, d=0.1):
     return np.array([dxdt, dydt])
 
 # Plotting the predator prey model over time
-X0 = [1, 1]
-n = np.linspace(0, 200, 1000)
-sol = solve_odes(f=lambda t, X: predator_prey(X, t, a=1.0, b=0.25, d=0.1), x0=X0, t0=0, t1=200, h=0.1, solver='rk4')
-plt.plot(sol[1], sol[0][0], label='prey population')
-plt.plot(sol[1], sol[0][1], label='predator population')
+sol, t = solve_odes(predator_prey, x0=[1,1], t0=0, t1=200, h=0.01, solver='rk4')
+plt.plot(t, sol[0], label='Prey')
+plt.plot(t, sol[1], label='Predator')
+plt.xlabel('Time')
+plt.ylabel('Population')
 plt.legend()
 plt.show()
