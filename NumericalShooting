@@ -1,0 +1,14 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.integrate import solve_ivp
+from scipy.optimize import root
+
+# Predator-prey function
+def predator_prey(X, t, a=1.0, b=0.25, d=0.1):
+    x = X[0]
+    y = X[1]
+    dxdt = x * (1 - x) - (a * x * y) / (d + x)
+    dydt = b * y * (1 - (y / x))
+    return np.array([dxdt, dydt])
+
+
