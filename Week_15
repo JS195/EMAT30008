@@ -20,37 +20,18 @@ plt.plot(sol.t, sol.y[1], label='predator population')
 plt.legend()
 plt.show()
 
-# Isolate a periodic orbit
-def shooting(f):
-    def G(u0T, phase_con, *pars):
-        def F(u0, T):
-            t_eval = np.linspace(0, T, 1000)
-            sol = solve_ivp(fun=lambda t, X: f(X, t, pars), t_span=[0, T], y0=u0, t_eval=t_eval, rtol=1e-8, atol=1e-8)
-            return sol.y[:, -1]
-        T, u0 = u0T[-1], u0T[:-1]
-        return np.append(u0 - F(u0, T), phase_con(u0, *pars))
-    return G
+# Iterates over many initial conditions
+t0 = 0
+t1 = 100
+h = 0.01
 
-#Determine the phase conditions
-def phase_condition(u0, *pars):
-    T = 10  # guess for the period
-    t_eval = np.linspace(0, T, 1000)
-    sol = solve_ivp(fun=lambda t, X: predator_prey(X, t, pars), t_span=[0, T], y0=u0, t_eval=t_eval, rtol=1e-8, atol=1e-8)
-    return sol.y[:, 0] - sol.y[:, -1]
+# Range of initial conditions
+x0_range = np.arange(0.1, 1, 0.1)
 
-a = 1.0
-b = 0.3
-d = 0.1
-u0_guess = [1, 1, 10]
-G = shooting(predator_prey)
-sol = root(fun=G, x0=u0_guess, args=(phase_condition, a, b, d))
-u0 = sol.x[:-1]
-T = sol.x[-1]
-print("Starting conditions: ", u0)
-print("Period: ", T)
-t_eval = np.linspace(0, T, 1000)
-sol = solve_ivp(fun=lambda t, X: predator_prey(X, t, [a, b, d]), t_span=[0, T], y0=u0, t_eval=t_eval, rtol=1e-8, atol=1e-8)
-plt.plot(sol.t, sol.y[0], label='prey population')
-plt.plot(sol.t, sol.y[1], label='predator population')
-plt.legend()
-plt.show()
+# Solve ODEs using RK4 method for each set of initial conditions
+for i, x0 in enumerate(x0_range):
+    # Set initial conditions
+    X0 = [x0, 1]
+    # Solve ODEs
+    sol, t = solve_odes(predator_prey, X0, t0, t1, h, solver='rk4')
+    sol = np.array(sol)
