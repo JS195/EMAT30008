@@ -31,6 +31,10 @@ plt.ylabel('y')
 plt.title('Predator-Prey Phase Portrait')
 plt.show()
 
+#Defining a phase condition
+def predator_prey_pc(x0, a, b, d):
+    return predator_prey(x0, 0, a, b, d)[0]
+
 # Iterates over many initial conditions
 t0 = 0
 t1 = 100
