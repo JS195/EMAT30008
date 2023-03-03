@@ -18,4 +18,3 @@ plt.xlabel('Time')
 plt.ylabel('Population')
 plt.legend()
 plt.show()
-

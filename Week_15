@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 from scipy.optimize import root
+from ODEsolver import solve_odes
 
 # Predator-prey function
 def predator_prey(X, t, a=1.0, b=0.25, d=0.1):
@@ -11,13 +12,23 @@ def predator_prey(X, t, a=1.0, b=0.25, d=0.1):
     dydt = b * y * (1 - (y / x))
     return np.array([dxdt, dydt])
 
+a = 1.0
+b=0.25
+d=0.1
 # Behaviour in the long-time limit
 X0 = [1, 1]
 t = np.linspace(0, 200, 1000)
-sol = solve_ivp(fun=lambda t, X: predator_prey(X, t), t_span=[0, 200], y0=X0, t_eval=t)
-plt.plot(sol.t, sol.y[0], label='prey population')
-plt.plot(sol.t, sol.y[1], label='predator population')
+sol,t = solve_odes(f=lambda t, X: predator_prey(X, t, a, b, d), x0=X0, t0=0, t1=200, h=0.1, solver='rk4')
+plt.plot(t, sol[0], label='prey population')
+plt.plot(t, sol[1], label='predator population')
 plt.legend()
+plt.show()
+
+# Plot the phase portrait
+plt.plot(sol[0], sol[1])
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Predator-Prey Phase Portrait')
 plt.show()
 
 # Iterates over many initial conditions
@@ -35,3 +46,5 @@ for i, x0 in enumerate(x0_range):
     # Solve ODEs
     sol, t = solve_odes(predator_prey, X0, t0, t1, h, solver='rk4')
     sol = np.array(sol)
+    print(sol)
+
