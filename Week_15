@@ -1,3 +1,4 @@
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
@@ -31,24 +32,22 @@ plt.ylabel('y')
 plt.title('Predator-Prey Phase Portrait')
 plt.show()
 
-#Defining a phase condition
-def predator_prey_pc(x0, a, b, d):
-    return predator_prey(x0, 0, a, b, d)[0]
+def nullcline(ode, u0range, index=0, points=500):
+    Vval = np.linspace(min(u0range), max(u0range), points)
+    Nval = np.zeros(np.size(Vval))
+    for (i, V) in enumerate(Vval):
+        result = root(lambda N: ode((V, N), np.nan, a, b, d)[index], 0)
+        if result.success:
+            Nval[i] = result.x
+        else:
+            Nval[i] = np.nan
+    return (Vval, Nval)
 
-# Iterates over many initial conditions
-t0 = 0
-t1 = 100
-h = 0.01
+# V nullcline
+(Vval, Nval) = nullcline(predator_prey, (-20, 20), index=0)
+plt.plot(Vval, Nval, "g-")
 
-# Range of initial conditions
-x0_range = np.arange(0.1, 1, 0.1)
-
-# Solve ODEs using RK4 method for each set of initial conditions
-for i, x0 in enumerate(x0_range):
-    # Set initial conditions
-    X0 = [x0, 1]
-    # Solve ODEs
-    sol, t = solve_odes(predator_prey, X0, t0, t1, h, solver='rk4')
-    sol = np.array(sol)
-    print(sol)
+# N nullcline
+(Vval, Nval) = nullcline(predator_prey, (-20, 20), index=1)
+plt.plot(Vval, Nval, "r-")
 
