@@ -73,8 +73,8 @@ def find_shooting_orbit(f, u0T, a, b, d):
     return shooting_orbit
 
 pred_prey_u0T = np.array([0.2,0.2,20])
-shooting_orbit = find_shooting_orbit(predator_prey, pred_prey_u0T, a, b, d)
-plt.plot(shooting_orbit)
+found_shooting_orbit = find_shooting_orbit(predator_prey, pred_prey_u0T, a, b, d)
+plt.plot(found_shooting_orbit)
 plt.show()
 
-print(shooting_orbit)
+print(found_shooting_orbit)

@@ -27,58 +27,63 @@ plt.plot(t, sol[1], label='predator population')
 plt.legend()
 plt.show()
 
+# Define parameters
+beta = 1.0
+theta = 0.5
 
 def hopf_actual(t, beta, theta):
     u1 = beta * math.cos(t + theta)
     u2 = beta * math.sin(t + theta)
     return u1, u2
 
+def hopf_bif(X, t, beta):
+    (u1, u2) = X
+    du1dt = (beta * u1) - u2 + u1 * (u1 ** 2 + u2 ** 2) - u1 * ((u1 ** 2 + u2 ** 2) ** 2)
+    du2dt = u1 + (beta * u2) + u2 * (u1 ** 2 + u2 ** 2) - u2 * ((u1 ** 2 + u2 ** 2) ** 2)
+    return np.array([du1dt, du2dt])
+
+def hopf_phase_condition(x0, beta):
+    return hopf_bif(x0, 0, beta)[0]
+
 def shooting(f):
-    def G(u0T, b,s):
+    def G(u0T, beta):
         def F(u0, T):
             t_span = [1e-6, T]
             t_eval = np.linspace(1e-6, T, 100)
-            sol = solve_ivp(fun=lambda t, X: f(X, t, b,s), t_span=t_span, y0=u0, t_eval=t_eval, method='RK45')
+            sol = solve_ivp(fun=lambda t, X: f(X, t, beta), t_span=t_span, y0=u0, t_eval=t_eval, method='RK45')
             final_sol = sol.y[:,-1]
             return final_sol
         T, u0 = u0T[-1], u0T[:-1]
-        print(T)
-        return np.append(u0 - F(u0, T), hopf_phase_condition(u0, b,s))
+        return np.append(u0 - F(u0, T), hopf_phase_condition(u0, beta))
     return G
 
-def find_shooting_orbit(f, u0T, b,s):
-    fsolve_sol = fsolve(shooting(f), u0T, (b,s), full_output=True)
+def find_shooting_orbit(f, u0T, beta):
+    fsolve_sol = fsolve(shooting(f), u0T, (beta), full_output=True)
     shooting_orbit = fsolve_sol[0]
     return shooting_orbit
 
 pred_prey_u0T = np.array([1.0,1.0,-2.0])
-found_shooting_orbit = find_shooting_orbit(hopf_bif, pred_prey_u0T, b,s)
+found_shooting_orbit = find_shooting_orbit(hopf_bif, pred_prey_u0T, beta)
 
 def hopf_actual(t, beta, theta):
     u1 = beta * math.cos(t + theta)
     u2 = beta * math.sin(t + theta)
     return u1, u2
 
-# Define parameters
-beta = 1.0
-theta = 0.5
-b = 1.0
-s = 0.5
-
 # Define actual Hopf orbit
 t_span = [0, 20]
 t_eval = np.linspace(0, 20, 100)
-sol = solve_ivp(fun=lambda t, X: hopf_actual(t, beta, theta), t_span=t_span, y0=[1.0, 0.0], t_eval=t_eval, method='RK45')
+sol = solve_ivp(fun=lambda t, X: hopf_actual(t, beta, theta), t_span=t_span, y0=[0.2, 0.2], t_eval=t_eval, method='RK45')
 u1_actual, u2_actual = sol.y[0], sol.y[1]
 
 # Find shooting Hopf orbit
-u0T = np.array([1.0, 2.0, 5.0])
-found_shooting_orbit = find_shooting_orbit(hopf_bif, u0T, b, s)
+u0T = np.array([1.0, 2.0, 3.0])
+found_shooting_orbit = find_shooting_orbit(hopf_bif, u0T, beta)
 u1_shooting, u2_shooting = [], []
 for t in t_eval:
     u1, u2 = hopf_actual(t, beta, theta)
+    print(u1,u2)
     u1_shooting.append(found_shooting_orbit[0] * u1 + found_shooting_orbit[1] * u2)
-    # u2_shooting.append(found_shooting_orbit[0] * u1 + found_shooting_orbit[2] * u2)
 
 # Plot results
 plt.plot(t_eval, u1_actual, label='Actual')
