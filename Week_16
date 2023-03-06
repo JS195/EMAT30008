@@ -16,7 +16,7 @@ def hopf_phase_condition(x0, b, s):
     return hopf_bif(x0, 0, b, s)[0]
 
 b = 0.5
-s = 0
+s = 1.0
 
 # Behaviour in the long-time limit
 X0 = [1, 1]
@@ -26,10 +26,6 @@ plt.plot(t, sol[0], label='prey population')
 plt.plot(t, sol[1], label='predator population')
 plt.legend()
 plt.show()
-
-# Define parameters
-beta = 1.0
-theta = 0.5
 
 def hopf_actual(t, beta, theta):
     u1 = beta * math.cos(t + theta)
@@ -50,7 +46,7 @@ def shooting(f):
         def F(u0, T):
             t_span = [1e-6, T]
             t_eval = np.linspace(1e-6, T, 100)
-            sol = solve_ivp(fun=lambda t, X: f(X, t, beta), t_span=t_span, y0=u0, t_eval=t_eval, method='RK45')
+            sol = solve_ivp(fun=lambda t, X: f(X, t, beta), t_span=t_span, y0=[0.2,0.2], t_eval=t_eval, method='RK45')
             final_sol = sol.y[:,-1]
             return final_sol
         T, u0 = u0T[-1], u0T[:-1]
@@ -63,30 +59,21 @@ def find_shooting_orbit(f, u0T, beta):
     return shooting_orbit
 
 pred_prey_u0T = np.array([1.0,1.0,-2.0])
+beta = 1.0
+
+# Evaluate the actual Hopf bifurcation orbit
+t_eval = np.linspace(0, 10*math.pi, 100)
+actual_orbit = np.array([hopf_actual(t, beta, 0.0) for t in t_eval])
+
+# Evaluate the shooting Hopf bifurcation orbit
 found_shooting_orbit = find_shooting_orbit(hopf_bif, pred_prey_u0T, beta)
+t_span = [1e-6, found_shooting_orbit[-1]]
+t_eval = np.linspace(1e-6, found_shooting_orbit[-1], 100)
+shooting_orbit = solve_ivp(fun=lambda t, X: hopf_bif(X, t, beta), t_span=t_span, y0=[0.2,0.2], t_eval=t_eval, method='RK45').y
 
-def hopf_actual(t, beta, theta):
-    u1 = beta * math.cos(t + theta)
-    u2 = beta * math.sin(t + theta)
-    return u1, u2
-
-# Define actual Hopf orbit
-t_span = [0, 20]
-t_eval = np.linspace(0, 20, 100)
-sol = solve_ivp(fun=lambda t, X: hopf_actual(t, beta, theta), t_span=t_span, y0=[0.2, 0.2], t_eval=t_eval, method='RK45')
-u1_actual, u2_actual = sol.y[0], sol.y[1]
-
-# Find shooting Hopf orbit
-u0T = np.array([1.0, 2.0, 3.0])
-found_shooting_orbit = find_shooting_orbit(hopf_bif, u0T, beta)
-u1_shooting, u2_shooting = [], []
-for t in t_eval:
-    u1, u2 = hopf_actual(t, beta, theta)
-    print(u1,u2)
-    u1_shooting.append(found_shooting_orbit[0] * u1 + found_shooting_orbit[1] * u2)
-
-# Plot results
-plt.plot(t_eval, u1_actual, label='Actual')
-plt.plot(t_eval, u1_shooting, label='Shooting')
-plt.legend()
+# Compute the difference between the actual and shooting orbits
+orbit_diff = actual_orbit - shooting_orbit.T
+plt.plot(orbit_diff)
 plt.show()
+print("Orbit difference:")
+print(orbit_diff)
