@@ -52,26 +52,29 @@ def nullcline(ode, u0range, index=0, points=500):
 #plt.show()
 
 def phase_condition(x0, a, b, d):
-    return predator_prey(x0, 0, a, b, d)[0]
+    return predator_prey(x0, 0, a,b,d)[0]
 
 def shooting(f):
-    def G(u0T, phase_con, *pars):
+    def G(u0T, a, b,d):
         def F(u0, T):
-            X0 = [1, 1]
-            t = np.linspace(0, 200, 1000)
-            sol,t = solve_odes(predator_prey, x0=[1,1], t0=0, t1=200, h=0.01, solver='rk4')
-            final_sol = sol[:, -1]
+            t_span = [1e-6, T]
+            t_eval = np.linspace(1e-6, T, 100)
+            sol = solve_ivp(fun=lambda t, X: f(X, t, a, b, d), t_span=t_span, y0=u0, t_eval=t_eval, method='RK45')
+            final_sol = sol.y[:,-1]
             return final_sol
         T, u0 = u0T[-1], u0T[:-1]
-        return np.append(u0 - F(u0, T), phase_con(u0, a, b, d))
+        print(T)
+        return np.append(u0 - F(u0, T), phase_condition(u0, a, b, d))
     return G
 
-def find_shooting_orbit(f, u0T, phase_cond, a, b, d):
-    fsolve_sol = fsolve(shooting(f), u0T, (phase_cond, a, b, d), full_output=True)
+def find_shooting_orbit(f, u0T, a, b, d):
+    fsolve_sol = fsolve(shooting(f), u0T, (a, b, d), full_output=True)
     shooting_orbit = fsolve_sol[0]
     return shooting_orbit
 
-pred_prey_u0T = np.array([0.58, 0.285, 21])
-shooting_orbit = find_shooting_orbit(predator_prey, pred_prey_u0T, phase_condition, a, b, d)
+pred_prey_u0T = np.array([0.2,0.2,20])
+shooting_orbit = find_shooting_orbit(predator_prey, pred_prey_u0T, a, b, d)
 plt.plot(shooting_orbit)
 plt.show()
+
+print(shooting_orbit)
