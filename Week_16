@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import solve_ivp
+from ODEsolver import solve_odes
 
 def hopf_bif(X, t, b, s):
     (u1, u2) = X
@@ -11,3 +11,14 @@ def hopf_bif(X, t, b, s):
 def hopf_phase_condition(x0, b, s):
     return hopf_bif(x0, 0, b, s)[0]
 
+b = 0.5
+s = 1.0
+
+# Behaviour in the long-time limit
+X0 = [1, 1]
+t = np.linspace(0, 200, 1000)
+sol,t = solve_odes(f=lambda t, X: hopf_bif(X, t, b, s), x0=X0, t0=0, t1=200, h=0.1, solver='rk4')
+plt.plot(t, sol[0], label='prey population')
+plt.plot(t, sol[1], label='predator population')
+plt.legend()
+plt.show()
