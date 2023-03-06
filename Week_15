@@ -1,8 +1,8 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 from scipy.optimize import root
+from scipy.optimize import fsolve
 from ODEsolver import solve_odes
 
 # Predator-prey function
@@ -17,20 +17,19 @@ a = 1.0
 b=0.25
 d=0.1
 # Behaviour in the long-time limit
-X0 = [1, 1]
 t = np.linspace(0, 200, 1000)
-sol,t = solve_odes(f=lambda t, X: predator_prey(X, t, a, b, d), x0=X0, t0=0, t1=200, h=0.1, solver='rk4')
-plt.plot(t, sol[0], label='prey population')
-plt.plot(t, sol[1], label='predator population')
-plt.legend()
-plt.show()
+sol, t = solve_odes(predator_prey, x0=[1,1], t0=0, t1=200, h=0.01, solver='rk4')
+#plt.plot(t, sol[0], label='prey population')
+#plt.plot(t, sol[1], label='predator population')
+#plt.legend()
+#plt.show()
 
 # Plot the phase portrait
-plt.plot(sol[0], sol[1])
-plt.xlabel('x')
-plt.ylabel('y')
-plt.title('Predator-Prey Phase Portrait')
-plt.show()
+#plt.plot(sol[0], sol[1])
+#plt.xlabel('x')
+#plt.ylabel('y')
+#plt.title('Predator-Prey Phase Portrait')
+#plt.show()
 
 def nullcline(ode, u0range, index=0, points=500):
     Vval = np.linspace(min(u0range), max(u0range), points)
@@ -45,9 +44,34 @@ def nullcline(ode, u0range, index=0, points=500):
 
 # V nullcline
 (Vval, Nval) = nullcline(predator_prey, (-20, 20), index=0)
-plt.plot(Vval, Nval, "g-")
+#plt.plot(Vval, Nval, "g-")
 
 # N nullcline
 (Vval, Nval) = nullcline(predator_prey, (-20, 20), index=1)
-plt.plot(Vval, Nval, "r-")
+#plt.plot(Vval, Nval, "r-")
+#plt.show()
 
+def phase_condition(x0, a, b, d):
+    return predator_prey(x0, 0, a, b, d)[0]
+
+def shooting(f):
+    def G(u0T, phase_con, *pars):
+        def F(u0, T):
+            X0 = [1, 1]
+            t = np.linspace(0, 200, 1000)
+            sol,t = solve_odes(f=lambda t, X: predator_prey(X, t, a, b, d), x0=X0, t0=0, t1=200, h=0.1, solver='rk4')
+            final_sol = sol[:, -1]
+            return final_sol
+        T, u0 = u0T[-1], u0T[:-1]
+        return np.append(u0 - F(u0, T), phase_con(u0, a, b, d))
+    return G
+
+def find_shooting_orbit(f, u0T, phase_cond, a, b, d):
+    fsolve_sol = fsolve(shooting(f), u0T, (phase_cond, a, b, d), full_output=True)
+    shooting_orbit = fsolve_sol[0]
+    return shooting_orbit
+
+pred_prey_u0T = np.array([0.58, 0.285, 21])
+shooting_orbit = find_shooting_orbit(predator_prey, pred_prey_u0T, phase_condition, a, b, d)
+plt.plot(shooting_orbit)
+plt.show()
