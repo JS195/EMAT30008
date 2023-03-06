@@ -1,10 +1,13 @@
-from Week_15 import phase_condition
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.integrate import solve_ivp
 
-pred_prey_u0T = np.array([0.2,0.2,20])
-shooting_orbit = find_shooting_orbit(predator_prey, pred_prey_u0T, a, b, d)
-plt.plot(shooting_orbit)
-plt.show()
+def hopf_bif(X, t, b, s):
+    (u1, u2) = X
+    du1dt = (b * u1) - u2 + ((s * u1) * (u1 ** 2 + u2 ** 2))
+    du2dt = u1 + (b * u2) + ((s * u2) * (u1 ** 2 + u2 ** 2))
+    return np.array([du1dt, du2dt])
 
-print(shooting_orbit)
+def hopf_phase_condition(x0, b, s):
+    return hopf_bif(x0, 0, b, s)[0]
+
