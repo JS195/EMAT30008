@@ -2,8 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ODEsolver import solve_odes
 
-def hopf_bif(X, t, b, s):
-    (u1, u2) = X
+def hopf_bif(X, t, b=0.5, s=1.0):
+    u1 = X[0]
+    u2 = X[1]
     du1dt = (b * u1) - u2 + ((s * u1) * (u1 ** 2 + u2 ** 2))
     du2dt = u1 + (b * u2) + ((s * u2) * (u1 ** 2 + u2 ** 2))
     return np.array([du1dt, du2dt])
@@ -16,8 +17,8 @@ s = 1.0
 
 # Behaviour in the long-time limit
 X0 = [1, 1]
-t = np.linspace(0, 200, 1000)
-sol,t = solve_odes(f=lambda t, X: hopf_bif(X, t, b, s), x0=X0, t0=0, t1=200, h=0.1, solver='rk4')
+t = np.linspace(0, 20, 100)
+sol, t = solve_odes(hopf_bif, x0=[1,1], t0=0, t1=20, h=0.1, solver='rk4')
 plt.plot(t, sol[0], label='prey population')
 plt.plot(t, sol[1], label='predator population')
 plt.legend()
