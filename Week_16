@@ -1,0 +1,10 @@
+from Week_15 import phase_condition
+import numpy as np
+import matplotlib.pyplot as plt
+
+pred_prey_u0T = np.array([0.2,0.2,20])
+shooting_orbit = find_shooting_orbit(predator_prey, pred_prey_u0T, a, b, d)
+plt.plot(shooting_orbit)
+plt.show()
+
+print(shooting_orbit)
