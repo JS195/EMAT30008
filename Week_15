@@ -59,7 +59,7 @@ def shooting(f):
         def F(u0, T):
             X0 = [1, 1]
             t = np.linspace(0, 200, 1000)
-            sol,t = solve_odes(f=lambda t, X: predator_prey(X, t, a, b, d), x0=X0, t0=0, t1=200, h=0.1, solver='rk4')
+            sol,t = solve_odes(predator_prey, x0=[1,1], t0=0, t1=200, h=0.01, solver='rk4')
             final_sol = sol[:, -1]
             return final_sol
         T, u0 = u0T[-1], u0T[:-1]
