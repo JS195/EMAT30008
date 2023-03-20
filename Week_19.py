@@ -91,7 +91,7 @@ def matrix_build(N):
 def boundary_conditions(N, alpha, beta):
     vector = np.zeros((N-1),)
     vector[0] = alpha
-    vector[-2] = beta
+    vector[-1] = beta
     return vector
     
 def source(N):
@@ -115,7 +115,7 @@ dx = grid[1]
 x_int = grid[2]
 
 gamma1=0.0
-gamma2=1.0
+gamma2=0.0
 D=1
 
 A_matrix = matrix_build(N)
