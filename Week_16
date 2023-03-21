@@ -5,6 +5,13 @@ from scipy.optimize import fsolve
 from scipy.integrate import solve_ivp
 import math
 
+def predator_prey(X, t, a=1.0, b=0.25, d=0.1):
+    x = X[0]
+    y = X[1]
+    dxdt = x * (1 - x) - (a * x * y) / (d + x)
+    dydt = b * y * (1 - (y / x))
+    return np.array([dxdt, dydt])
+
 def hopf_bif(X, t, b=0.5, s=1.0):
     u1 = X[0]
     u2 = X[1]
@@ -59,9 +66,8 @@ def find_shooting_orbit(f, u0T, beta):
     return shooting_orbit
 
 pred_prey_u0T = np.array([1.0,1.0,-2.0])
-beta = 1.0
-
-# Evaluate the actual Hopf bifurcation orbit
+beta = 2.0
+#Evaluate the actual Hopf bifurcation orbit
 t_eval = np.linspace(0, 10*math.pi, 100)
 actual_orbit = np.array([hopf_actual(t, beta, 0.0) for t in t_eval])
 
