@@ -116,7 +116,7 @@ x_int = grid[2]
 
 gamma1=0.0
 gamma2=0.0
-D=1
+D=2
 
 A_matrix = matrix_build(N)
 b_matrix = - ((dx)**2)*source(N) - A_matrix @ boundary_conditions(N,gamma1,gamma2)
