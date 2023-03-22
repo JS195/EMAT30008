@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import math
 import time
 
-def euler_step(f, x, t, dt):
+def euler_step(f, x, t, dt, *pars):
     """
     :descript: Performs an euler step
     :param f: Function defining an ODE or ODE system
@@ -12,11 +12,11 @@ def euler_step(f, x, t, dt):
     :param dt: Time step size
     :returns: The value of x after one timestep, and the new value of t
     """
-    x_new = x + dt * f(x,t)
+    x_new = x + dt * f(x, t, *pars)
     t_new = t + dt
     return x_new, t_new
 
-def RK4_step(f, x, t, dt):
+def RK4_step(f, x, t, dt, **kwargs):
     """
     :descript: Performs a step using the Runge-Kutta-4 method
     :param f: Function defining an ODE or ODE system
@@ -25,15 +25,15 @@ def RK4_step(f, x, t, dt):
     :param dt: Time step size
     :returns: The value of x after one timestep, and the new value of t
     """
-    k1 = dt * f(x, t)
-    k2 = dt * f(x + k1/2, t + dt/2)
-    k3 = dt * f(x + k2/2, t + dt/2)
-    k4 = dt * f(x + k3, t + dt)
+    k1 = dt * f(x, t, **kwargs)
+    k2 = dt * f(x + k1/2, t + dt/2, **kwargs)
+    k3 = dt * f(x + k2/2, t + dt/2, **kwargs)
+    k4 = dt * f(x + k3, t + dt, **kwargs)
     x_new = x + (k1 + 2 * k2 + 2 * k3 + k4) / 6
     t_new = t + dt
     return x_new, t_new
 
-def solve_to(f, x, t, t1, dt_max, solver='rk4'):
+def solve_to(f, x, t, t1, dt_max, solver='rk4', *pars):
     """
     :descript: Solves ODE f in the range t to t1 with initial condition x
     :param f: Function defining an ODE or ODE system
@@ -47,14 +47,14 @@ def solve_to(f, x, t, t1, dt_max, solver='rk4'):
     while t < t1:
         dt = min(dt_max, t1 - t)
         if solver == 'euler':
-            x_new,t_new = euler_step(f, x, t, dt)
+            x_new,t_new = euler_step(f, x, t, dt, *pars)
         elif solver == 'rk4':
-            x_new,t_new = RK4_step(f, x, t, dt)
+            x_new,t_new = RK4_step(f, x, t, dt, *pars)
         x = x_new
         t = t_new
     return x_new, t_new
 
-def solve_odes(f, x0, t0, t1, dt_max, solver='rk4'):
+def solve_odes(f, x0, t0, t1, dt_max, solver='rk4', **kwargs):
     """
     :descript: Solves ODE f in the range t to t1 with initial condition x
     :param f: Function defining an ODE or ODE system
@@ -73,15 +73,15 @@ def solve_odes(f, x0, t0, t1, dt_max, solver='rk4'):
     for i in range(n):
         dt = min(dt_max, t1 - t)
         if solver == 'euler':
-            x, t = euler_step(f, x, t, dt)
+            x, t = euler_step(f, x, t, dt, **kwargs)
         elif solver == 'rk4':
-            x, t = RK4_step(f, x, t, dt)
+            x, t = RK4_step(f, x, t, dt, **kwargs)
         sol[i+1] = x
     return sol.T, np.linspace(t0, t1, n+1)
 
 
 # Errors of the two methods plotted on the same graph
-def errors(f, h, x0, t0, t1):
+def errors(f, h, x0, t0, t1, *pars):
     """
     :descript: Creates a loglog graph of the error produced from the rk4 and euler method
     :param f: Function defining an ODE or ODE system
@@ -96,10 +96,10 @@ def errors(f, h, x0, t0, t1):
     dt_max = h
 
     for i in range(1000):
-        ans1 = solve_to(f, x0, t0, t1, dt_max, 'euler')[0]
+        ans1 = solve_to(f, x0, t0, t1, dt_max, 'euler', *pars)[0]
         error1 = abs(math.e - ans1)
         errorsEuler.append(error1)
-        ans2 = solve_to(f, x0, t0, t1, dt_max,'rk4')[0]
+        ans2 = solve_to(f, x0, t0, t1, dt_max,'rk4', *pars)[0]
         error2 = abs(math.e - ans2)
         errorsRK4.append(error2)
         dt_max = dt_max + h
@@ -114,7 +114,7 @@ def errors(f, h, x0, t0, t1):
     plt.show()
 
 #Time taken for the two methods over 1000 iterations
-def timing(f, x0, t0, t1):
+def timing(f, x0, t0, t1, *pars):
     """
     :descript: Times the two methods over 1000 runs
     :param f: Function defining an ODE or ODE system
@@ -126,13 +126,13 @@ def timing(f, x0, t0, t1):
     tic = time.perf_counter()
     n=0
     while n<1000:
-        ans1, t1 = solve_to(f, x0, t0, t1, 0.001, 'euler')
+        ans1, t1 = solve_to(f, x0, t0, t1, 0.001, 'euler', *pars)
         n = n+1
     toc = time.perf_counter()
     tic1 = time.perf_counter()
     n=0
     while n<1000:
-        ans2, t2 = solve_to(f, x0, t0, t1, 10,'rk4')
+        ans2, t2 = solve_to(f, x0, t0, t1, 10,'rk4', *pars)
         n=n+1
     toc1 = time.perf_counter()
     return(toc-tic, toc1-tic1)
