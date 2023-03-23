@@ -8,11 +8,9 @@ from scipy.optimize import fsolve
 def predator_prey(X, t, pars):
     """
     :descript: Defines the predator-prey equations
-
     :param X: Vector of (x, y) values
     :param t: Time value
     :param pars: Other paramters required to define the equation (a, b, d)
-
     :returns: Array of derivatives dx/dt and dy/dt
     """
     x = X[0]
@@ -25,7 +23,6 @@ def predator_prey(X, t, pars):
 def long_term_behaviour():
     """
     :descript: Produces subplots of the predator-prey function for different input parameters
-
     :returns: None
     """
     parameter_sets = [
@@ -48,7 +45,6 @@ def long_term_behaviour():
 def plot_phase_portrait(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.01, solver='rk4', **kwargs):
     """
     :descript: Plots the phase portrait of an ODE or ODE system
-
     :param func: The function defining the ODE or ODE system
     :param x0: The initial condition for the ODE system
     :param t0: The initial time for the ODE system
@@ -56,7 +52,6 @@ def plot_phase_portrait(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.0
     :param dt_max: The maximum time step size allowed by the solver
     :param solver: The ODE solver to use. Should be one of 'rk4' (default) or 'euler'
     :param **kwargs: Additional keyword arguments to pass to the ODE solver
-
     :returns: None
     """
     sol, t = solve_odes(func, x0=x0, t0=t0, t1=t1, dt_max=dt_max, solver=solver, **kwargs)
@@ -69,7 +64,6 @@ def plot_phase_portrait(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.0
 def isolate_orbit(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.01, solver='rk4', **kwargs):
     """
     :descript: Given an ODE system, function finds a periodic orbit and returns its initial conditions and time period
-
     :param func: The function defining the ODE or ODE system
     :param x0: The initial condition for the ODE system
     :param t0: The initial time for the ODE system
@@ -77,7 +71,6 @@ def isolate_orbit(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.01, sol
     :param dt_max: The maximum time step size allowed by the solver
     :param solver: The ODE solver to use. Should be one of 'rk4' (default) or 'euler'
     :param **kwargs: Additional keyword arguments to pass to the ODE solver
-
     :returns: A list or tuple containing the initial conditions of the periodic orbit and its period
     :raises RuntimeError: If no periodic orbit is found
     """
@@ -97,11 +90,36 @@ def isolate_orbit(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.01, sol
     raise RuntimeError("No orbit found")
 
 def phase_condition(x0, *pars):
+    """
+    :descript: Returns the predator-prey phase condition of dx/dt(0) = 0
+    :param x0: The initial condition for the ODE system
+    :param *pars: Additional arguments to pass to the predator-prey funtion
+    :returns: The phase condition of the predator-prey system
+    """
     return predator_prey(x0, 0, *pars)[0]
 
 def shooting(f):
+    """
+    :descript: Finds the initial conditions and time period of a periodic orbit for a given ODE system
+    :param f: The function defining the ODE or ODE system
+    :returns: A list or tuple containing the initial conditions of the periodic orbit and its period
+    """
     def G(u0T, pars):
+        """
+        :descript: Helper function for shooting method. Returns the difference between the initial and final states 
+        of the ODE system for a given set of initial conditions and time period
+        :param u0T: List or tuple containing the initial conditions and time period of the periodic orbit
+        :param pars: Additional parameters required to define the ODE system
+        :returns: The difference between the final and initial states of the ODE system
+        """
         def F(u0, T):
+            """
+            :descript: Helper function for shooting method. Solves the ODE system for a given set of initial conditions 
+            and time period, and returns the final state.
+            :param u0: Initial conditions of the ODE system
+            :param T: Time period of the periodic orbit
+            :returns: The final state of the ODE system
+            """
             t_span = [1e-6, T]
             t_eval = np.linspace(1e-6, T, 100)
             sol = solve_ivp(fun=lambda t, X: f(X, t, pars), t_span=t_span, y0=u0, t_eval=t_eval, method='RK45')
@@ -111,13 +129,20 @@ def shooting(f):
         return np.append(u0 - F(u0, T), phase_condition(u0, pars))
     return G
 
-pars = [1.0, 0.5, 0.1]
-
 def find_shooting_orbit(f, u0T, pars):
+    """
+    :descript: Finds the initial conditions and time period of a periodic orbit for a given ODE system
+    :param f: The function defining the ODE or ODE system
+    :param u0T: The initial conditions of the periodic orbit
+    :param pars: Additional parameters for the ODE system
+    :returns: A list or tuple containing the initial conditions of the periodic orbit and its period
+    """
     fsolve_sol = fsolve(shooting(f), u0T, pars, full_output=True)
     shooting_orbit = fsolve_sol[0]
     return shooting_orbit
 
+
+pars = [1.0, 0.5, 0.1]
 pred_prey_u0T = np.array([0.2,0.2,13])
 found_shooting_orbit = find_shooting_orbit(predator_prey, pred_prey_u0T, pars)
 print(found_shooting_orbit)
