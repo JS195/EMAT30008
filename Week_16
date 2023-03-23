@@ -28,7 +28,7 @@ s = 1.0
 # Behaviour in the long-time limit
 X0 = [1, 1]
 t = np.linspace(0, 20, 100)
-sol, t = solve_odes(hopf_bif, x0=[1,1], t0=0, t1=20, h=0.1, solver='rk4')
+sol, t = solve_odes(predator_prey, x0=[1,1], t0=0, t1=200, h=0.1, solver='rk4')
 plt.plot(t, sol[0], label='prey population')
 plt.plot(t, sol[1], label='predator population')
 plt.legend()

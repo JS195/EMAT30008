@@ -59,7 +59,7 @@ def shooting(f):
         def F(u0, T):
             t_span = [1e-6, T]
             t_eval = np.linspace(1e-6, T, 100)
-            sol = solve_ivp(fun=lambda t, X: f(X, t, a, b, d), t_span=t_span, y0=u0, t_eval=t_eval, method='RK45')
+            sol, t = solve_ivp(fun=lambda t, X: f(X, t, a, b, d), t_span=t_span, y0=u0, t_eval=t_eval, method='RK45')
             final_sol = sol.y[:,-1]
             return final_sol
         T, u0 = u0T[-1], u0T[:-1]
@@ -83,7 +83,7 @@ plt.show()
 print(found_shooting_orbit)
 
 def isolate_orbit(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.01, solver='rk4', **kwargs):
-    solution, t = solve_odes(predator_prey, x0=x0, t0=t0, t1=t1, dt_max=dt_max, solver=solver, **kwargs)
+    solution, t = solve_odes(func, x0=x0, t0=t0, t1=t1, dt_max=dt_max, solver=solver, **kwargs)
     x_values = np.asarray(solution[0])
     max_indices = [i for i in find_peaks(x_values)[0]]
     previous_value = False

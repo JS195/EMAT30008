@@ -21,6 +21,7 @@ def solve_to(f,x0,t0,t1,dt_max):
 # Calculating errors for a range of dt
 def func(x, t): 
     return x
+
 errors = []
 x0 = 1
 t0 = 0
@@ -126,3 +127,7 @@ ansRK4, tRK4 = solve_to(func, x0, t0, t1, h,'rk4')
 end_timeRK4 = time.perf_counter()
 
 print(end_timeEuler, end_timeRK4)
+
+from ODEsolver import errors 
+
+errors(func, h, x0, t0, t1)
