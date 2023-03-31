@@ -138,7 +138,7 @@ x = grid[0]
 dx = grid[1]
 x_int = grid[2]
 A_matrix = matrix_build(N,D)
-b_matrix = - ((dx)**2)*source(N, integer) - A_matrix @ robin(N,gamma1,gamma2,b)
+b_matrix = - ((dx)**2)*source(N, integer) - A_matrix @ dirichlet(N,gamma1,gamma2)
 x_ans = np.linalg.solve(A_matrix, b_matrix)
 u_ans = true_ans(x_int, a, b, gamma1, gamma2, D, integer)
 

@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from Week_14 import RK4_step
 
 D = 0.5
 
@@ -76,3 +77,4 @@ def animate(i):
 ani = animation.FuncAnimation(fig, animate, frames=N_time, blit=False, interval=50)
 ax.legend()
 plt.show()
+

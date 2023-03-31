@@ -41,7 +41,7 @@ x=np.linspace(a,b,N+1)
 dx=(b-a)/N
 x_int=x[1:-1]
 D = 2
-integer = 7
+integer = 2
 
 grid = finite_grid(N, a, b)
 x = grid[0]

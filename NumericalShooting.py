@@ -142,7 +142,7 @@ def find_shooting_orbit(f, u0T, pars):
     return shooting_orbit
 
 
-pars = [1.0, 0.5, 0.1]
-pred_prey_u0T = np.array([0.2,0.2,13])
+pars = [1.0, 0.1, 0.1]
+pred_prey_u0T = np.array([0.8,0.2,30])
 found_shooting_orbit = find_shooting_orbit(predator_prey, pred_prey_u0T, pars)
 print(found_shooting_orbit)

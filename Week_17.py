@@ -16,10 +16,10 @@ def param_cont_cubic(func=cubic):
 
 c = np.linspace(-2, 2, 100)
 solutions = param_cont_cubic(func=cubic)
-#plt.plot(c, solutions)
-#plt.xlabel('c')
-#plt.ylabel('x')
-#plt.show()
+plt.plot(c, solutions)
+plt.xlabel('c')
+plt.ylabel('x')
+plt.show()
 
 
 
