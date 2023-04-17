@@ -7,7 +7,7 @@ def heat_equation(N, D, gamma1, gamma2, a, b, dt, dx, t):
     A_matrix = matrix_build(N,D)
     b_matrix = A_matrix @ boundary_conditions(N,gamma1,gamma2)
 
-    U = np.zeros((N_time + 1,N-1))
+    U = np.zeros((N_time + 1, N-1))
     U[0,:] = np.sin(np.pi*(x_int-a)/(b-a))
     
     for i in range(0,N_time-1):
@@ -15,6 +15,25 @@ def heat_equation(N, D, gamma1, gamma2, a, b, dt, dx, t):
 
     u_true = np.zeros((N_time+1, N-1))
     for n in range(0, N_time):
+        u_true[n,:] = np.exp(-(b-a)**2*D*np.pi**2*t[n]) * np.sin(np.pi*(x_int-a)/(b-a))
+    
+    return U, u_true
+
+def heat_equation_RK4(N, D, gamma1, gamma2, a, b, dt, dx, t):
+    A_matrix = matrix_build(N,D)
+    b_matrix = A_matrix @ boundary_conditions(N,gamma1,gamma2)
+
+    U = np.zeros((len(t), N-1))
+    U[0,:] = np.sin(np.pi*(x_int-a)/(b-a))
+    
+    def f(U, t):
+        return D/dx**2 * (A_matrix @ U + b_matrix)
+    
+    for i in range(len(t)-1):
+        U[i+1,:], _ = RK4_step(f, U[i,:], t[i], dt)
+
+    u_true = np.zeros((len(t), N-1))
+    for n in range(len(t)):
         u_true[n,:] = np.exp(-(b-a)**2*D*np.pi**2*t[n]) * np.sin(np.pi*(x_int-a)/(b-a))
     
     return U, u_true
