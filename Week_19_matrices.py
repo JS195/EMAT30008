@@ -4,12 +4,12 @@ from scipy.integrate import quad
 
 def matrix_build(N,D):
     matrix = np.zeros(((N-1),(N-1)))
-    np.fill_diagonal(matrix, -2*D)
+    np.fill_diagonal(matrix, -2)
     for i in range((N-1)):
         for j in range((N-1)):
             if i == j-1 or i==j+1:
-                matrix[i][j]= D
-    return matrix
+                matrix[i][j]= 1
+    return matrix*D
 
 def boundary_conditions(N, alpha, beta):
     vector = np.zeros((N-1),)

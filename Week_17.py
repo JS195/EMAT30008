@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.optimize import fsolve
 import matplotlib.pyplot as plt
+from Week_16 import shooting
 
 def cubic(x, pars):
     return x ** 3 - x + pars
@@ -46,3 +47,18 @@ plt.plot(sol_list1, sol_list2, beta)
 plt.xlabel('sol_list1')
 plt.ylabel('sol_list2')
 plt.show()
+
+def param_cont(func, u0, a, b):
+    sol_list1 = []
+    sol_list2 = []
+    u0 = u0
+    beta = np.linspace(a,b,100)
+    for i in beta:
+        sol1, sol2 = fsolve(func, u0, args=(i,))
+        sol_list1.append(sol1)
+        sol_list2.append(sol2)
+        u0 = ([sol1,sol2])
+    plt.plot(np.array(sol_list1), np.array(sol_list2), beta)
+    plt.xlabel('sol_list1')
+    plt.ylabel('sol_list2')
+    plt.show()

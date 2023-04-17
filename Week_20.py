@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from math import ceil
 import matplotlib.animation as animation
 
-C = 0.49
+C = 0.9
 dt= C*dx**2/D
 t_final = 1
 N_time = int(np.ceil(t_final/dt))
