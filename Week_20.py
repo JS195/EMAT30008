@@ -40,21 +40,6 @@ for n in range(0, N_time):
             u[n+1,N-2] = u[n,N-2] +C*(beta-2*u[n,N-2] +u[n,N-3])
 
 
-#fig, ax = plt.subplots()
-#ax.set_ylim(0,1)
-#ax.set_xlabel(f'$x$')
-#ax.set_ylabel(f'$u(x,t)$')
-
-#line, = ax.plot(x_int, u[0, :])
-
-#def animate(i):
-#    line.set_data((x_int, u[i,:]))
-#    return line
-
-#ani = animation.FuncAnimation(fig, animate, frames =N_time, blit=False, interval=50)
-#plt.show()
-
-
 # Compute the true solution
 u_true = np.zeros((N_time+1, N-1))
 for n in range(0, N_time):
