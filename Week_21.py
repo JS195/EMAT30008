@@ -32,7 +32,7 @@ def crank(N, a, b, gamma1, gamma2, D):
     
     return U, x_int
 
-def interp_comparison(x, t):
+def interp_comparison(x, t, N, a, b, gamma1, gamma2, D):
     print('true sol = ', np.exp(-0.2*np.pi**2))
     U, x_int = crank(N, a, b, gamma1, gamma2, D)
     y_interp = scipy.interpolate.interp1d(U[t,:], x_int, kind='linear')
@@ -73,7 +73,7 @@ def main():
     plt.show()
 
     # Part 3, comparing Euler and crank methods
-    interp_comparison(0.5, 2)
-    
+    interp_comparison(0.5, 2, N, a, b, gamma1, gamma2, D)
+
 if __name__ == "__main__":
     main()
