@@ -37,9 +37,6 @@ a=0
 b=1
 gamma1=0.0
 gamma2=0.0
-x=np.linspace(a,b,N+1)
-dx=(b-a)/N
-x_int=x[1:-1]
 D = 2
 integer = 2
 
