@@ -1,8 +1,7 @@
-from Week_19_matrices import matrix_build, boundary_conditions
-from Week_20 import time_grid
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.sparse.linalg import spsolve
+from Week_19 import matrix_build, boundary_conditions
+from Week_20 import time_grid
 
 def b_euler(N, a, b, gamma1, gamma2, D):
     dt, dx, t, N_time, x_int = time_grid(N, a, b)
@@ -18,19 +17,24 @@ def b_euler(N, a, b, gamma1, gamma2, D):
     
     return U, x_int
 
-N = 20
-a = 0
-b = 1
-gamma1 = 0.0
-gamma2 = 0.0
-D = 0.1
 
-# Plot the solution at each time step
-U, x_int = b_euler(N, a, b, gamma1, gamma2, D)
-plt.plot(x_int, U[0,:], 'ro', label='solution for t=0')
-plt.legend()
-plt.xlabel('x')
-plt.ylabel('u')
-plt.xlim(a, b)
-plt.ylim(a, b)
-plt.show()
+def main()
+    N = 20
+    a = 0
+    b = 1
+    gamma1 = 0.0
+    gamma2 = 0.0
+    D = 0.1
+
+    # Plot the solution at each time step
+    U, x_int = b_euler(N, a, b, gamma1, gamma2, D)
+    plt.plot(x_int, U[0,:], 'ro', label='solution for t=0')
+    plt.legend()
+    plt.xlabel('x')
+    plt.ylabel('u')
+    plt.xlim(a, b)
+    plt.ylim(a, b)
+    plt.show()
+
+if __name__ == "__main__":
+    main()
