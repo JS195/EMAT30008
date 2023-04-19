@@ -128,6 +128,6 @@ end_timeRK4 = time.perf_counter()
 
 print(end_timeEuler, end_timeRK4)
 
-from ODEsolver import errors 
+from Archive.OldODEsolver import errors 
 
 errors(func, h, x0, t0, t1)

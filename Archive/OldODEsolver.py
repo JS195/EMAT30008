@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import time
-from TestingFunctions import euler_number, true_euler_number, predator_prey
 
 def euler_step(f, x, t, dt, **kwargs):
     """
@@ -34,6 +33,27 @@ def RK4_step(f, x, t, dt, **kwargs):
     t_new = t + dt
     return x_new, t_new
 
+def solve_to(f, x, t, t1, dt_max, solver='rk4', **kwargs):
+    """
+    :descript: Solves ODE f in the range t to t1 with initial condition x
+    :param f: Function defining an ODE or ODE system
+    :param x: Starting value of x
+    :param t: Starting time value
+    :param t1: Final time value
+    :param dt_max: Maximum step size
+    :solver: Defines the solver to use (either 'euler' or 'rk4')
+    :returns: The value of x at the final time t1. 
+    """
+    while t < t1:
+        dt = min(dt_max, t1 - t)
+        if solver == 'euler':
+            x_new,t_new = euler_step(f, x, t, dt, **kwargs)
+        elif solver == 'rk4':
+            x_new,t_new = RK4_step(f, x, t, dt, **kwargs)
+        x = x_new
+        t = t_new
+    return x_new, t_new
+
 def solve_odes(f, x0, t0, t1, dt_max, solver='rk4', **kwargs):
     """
     :descript: Solves ODE f in the range t to t1 with initial condition x
@@ -57,6 +77,8 @@ def solve_odes(f, x0, t0, t1, dt_max, solver='rk4', **kwargs):
         elif solver == 'rk4':
             x, t = RK4_step(f, x, t, dt, **kwargs)
         sol[i+1] = x
+    if sol.shape[1] > 2:
+        sol = sol.T
     return np.array(sol), np.linspace(t0, t1, n+1)
 
 # Errors of the two methods plotted on the same graph
@@ -77,26 +99,52 @@ def error_difference(f, x0, t0, t1, true_solution, pars):
     plt.loglog(timestep, eulererror, 'x-')
     plt.show()
 
-def plot_different_parameters(f, x0, t0, t1, dt_max, params, solver='rk4'):
-    fig, axs = plt.subplots(1, len(params), figsize=(12, 4))
-    for i, p in enumerate(params):
-        sol, t = solve_odes(f, x0, t0, t1, dt_max, solver, pars=p)
-        axs[i].plot(t, sol[:, 0], label='Prey')
-        axs[i].plot(t, sol[:, 1], label='Predator')
-        axs[i].set_xlabel('Time')
-        axs[i].set_ylabel('Population')
-        axs[i].set_title('Parameters: {}'.format(p))
-        axs[i].legend()
+def true_euler_number(t):
+    return np.exp(t)
 
-    plt.subplots_adjust(wspace=0.3)
-    plt.show()
+#Time taken for the two methods over 1000 iterations
+def timing(f, x0, t0, t1, *pars):
+    """
+    :descript: Times the two methods over 1000 runs
+    :param f: Function defining an ODE or ODE system
+    :param x0: Starting value of x
+    :param t0: Starting time value
+    :param t1: Final time value
+    :returns: The time taken for the euler step and rk4 method 
+    """ 
+    tic = time.perf_counter()
+    n=0
+    while n<1000:
+        ans1, t1 = solve_to(f, x0, t0, t1, 0.001, 'euler', *pars)
+        n = n+1
+    toc = time.perf_counter()
+    tic1 = time.perf_counter()
+    n=0
+    while n<1000:
+        ans2, t2 = solve_to(f, x0, t0, t1, 10,'rk4', *pars)
+        n=n+1
+    toc1 = time.perf_counter()
+    return(toc-tic, toc1-tic1)
 
-def main():
-    pars = 1
-    error_difference(euler_number, x0=1, t0=0, t1=1, true_solution = true_euler_number, pars = pars)
+def func1(x ,t):
+    """
+    :descript: Defines the ODE dx/dt = x
+    :param x: Value of x
+    :param t: Time t
+    :returns: Value of dx/dt = x
+    """
+    return x
 
-    params = [[1.0, 0.1, 0.1], [1.0, 0.25, 0.1], [1.0, 0.4, 0.1]]
-    plot_different_parameters(predator_prey, x0=[1,1], t0=0, t1=200, dt_max=0.01, params=params)
+def func2(x ,t):
+    """
+    :descript: Defines the second order ODE d_xx = -x
+    :param x: A vector of parameter values (x, y)
+    :param t: Time value
+    :returns: An array of dx/dt = y and dy/dt = -x at (x, t) 
+    """
+    X = x[0]
+    y = x[1]
+    dxdt = y
+    dydt = -X
+    return np.array([dxdt, dydt])
 
-if __name__ == "__main__":
-    main()
