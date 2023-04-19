@@ -4,20 +4,18 @@ import math
 import time
 from TestingFunctions import euler_number, true_euler_number, predator_prey, func2
 
-def predator_prey(X, t, pars):
+def euler_step(f, x, t, dt, **kwargs):
     """
-    :descript: Defines the predator-prey equations
-    :param X: Vector of (x, y) values
-    :param t: Time value
-    :param pars: Other paramters required to define the equation (a, b, d)
-    :returns: Array of derivatives dx/dt and dy/dt
+    :descript: Performs an euler step
+    :param f: Function defining an ODE or ODE system
+    :param x: Starting value of x
+    :param t: Starting time value
+    :param dt: Time step size
+    :returns: The value of x after one timestep, and the new value of t
     """
-    x = X[0]
-    y = X[1]
-    a, b, d = pars[0], pars[1], pars[2]
-    dxdt = x * (1 - x) - (a * x * y) / (d + x)
-    dydt = b * y * (1 - (y / x))
-    return np.array([dxdt, dydt])
+    x_new = x + dt * f(x, t, **kwargs)
+    t_new = t + dt
+    return x_new, t_new
 
 def RK4_step(f, x, t, dt, **kwargs):
     """
@@ -50,7 +48,7 @@ def solve_odes(f, x0, t0, t1, dt_max, solver='rk4', **kwargs):
     t = t0
     x = np.array(x0)
     n = math.ceil((t1 - t0) / dt_max)
-    sol = np.zeros((n+1, len(x0) if isinstance(x0, (list, tuple)) else 1))
+    sol = np.zeros((n+1, len(x0) if isinstance(x0, (list, tuple, np.ndarray)) else 1))
     sol[0] = x
     for i in range(n):
         dt = min(dt_max, t1 - t)

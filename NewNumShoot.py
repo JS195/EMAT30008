@@ -2,11 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import time
-from TestingFunctions import predator_prey, pred_prey_pc, hopf, hopf_pc
-from ODEsolver import solve_odes, plot_different_parameters
-from scipy.signal import find_peaks
-from scipy.integrate import solve_ivp
+from TestingFunctions import predator_prey, pred_prey_pc
+from ODEsolver import solve_odes
 from scipy.optimize import fsolve
+from scipy.signal import find_peaks
 
 def plot_phase_portrait(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.01, solver='rk4', **kwargs):
     """
@@ -44,48 +43,21 @@ def iso_orbit(f, x0, t0, t1, dt_max, **kwargs):
         previous_peak_value = x_coords[current_peak_index]
     return None
 
-def shooting(f):
-    """
-    :descript: Finds the initial conditions and time period of a periodic orbit for a given ODE system
-    :param f: The function defining the ODE or ODE system
-    :returns: A list or tuple containing the initial conditions of the periodic orbit and its period
-    """
+def shooting():
     def G(u0T, pars):
-        """
-        :descript: Helper function for shooting method. Returns the difference between the initial and final states 
-        of the ODE system for a given set of initial conditions and time period
-        :param u0T: List or tuple containing the initial conditions and time period of the periodic orbit
-        :param pars: Additional parameters required to define the ODE system
-        :returns: The difference between the final and initial states of the ODE system
-        """
         def F(u0, T):
-            """
-            :descript: Helper function for shooting method. Solves the ODE system for a given set of initial conditions 
-            and time period, and returns the final state.
-            :param u0: Initial conditions of the ODE system
-            :param T: Time period of the periodic orbit
-            :returns: The final state of the ODE system
-            """
-            t_span = [1e-6, T]
-            t_eval = np.linspace(1e-6, T, 100)
-            sol = solve_ivp(fun=lambda t, X: f(X, t, pars), t_span=t_span, y0=u0, t_eval=t_eval, method='RK45')
-            final_sol = sol.y[:,-1]
+            sol, t = solve_odes(predator_prey, x0=u0, t0=0, t1=T, dt_max=0.01, solver='rk4', pars=pars)
+            final_sol = sol[-1, :]
             return final_sol
         T, u0 = u0T[-1], u0T[:-1]
-        return np.append(u0 - F(u0, T), hopf_pc(u0, pars))
+        return np.append(u0 - F(u0, T), pred_prey_pc(u0, pars=pars))
     return G
 
-def find_shooting_orbit(f, u0T, pars):
-    """
-    :descript: Finds the initial conditions and time period of a periodic orbit for a given ODE system
-    :param f: The function defining the ODE or ODE system
-    :param u0T: The initial conditions of the periodic orbit
-    :param pars: Additional parameters for the ODE system
-    :returns: A list or tuple containing the initial conditions of the periodic orbit and its period
-    """
-    fsolve_sol = fsolve(shooting(f), u0T, pars, full_output=True)
-    shooting_orbit = fsolve_sol[0]
-    return shooting_orbit
+pars = [1.0, 0.2, 0.1]
+u0T = [0.57, 0.28, 20]
+
+orbit = fsolve(shooting(), u0T, pars)
+print("Orbit: ", orbit)
 
 def main():
     params = [[1.0, 0.1, 0.1], [1.0, 0.25, 0.1], [1.0, 0.4, 0.1]]
