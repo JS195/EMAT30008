@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import math
 import time
 
-def euler_step(f, x, t, dt, *pars):
+def euler_step(f, x, t, dt, **kwargs):
     """
     :descript: Performs an euler step
     :param f: Function defining an ODE or ODE system
@@ -12,7 +12,7 @@ def euler_step(f, x, t, dt, *pars):
     :param dt: Time step size
     :returns: The value of x after one timestep, and the new value of t
     """
-    x_new = x + dt * f(x, t, *pars)
+    x_new = x + dt * f(x, t, **kwargs)
     t_new = t + dt
     return x_new, t_new
 
@@ -33,7 +33,7 @@ def RK4_step(f, x, t, dt, **kwargs):
     t_new = t + dt
     return x_new, t_new
 
-def solve_to(f, x, t, t1, dt_max, solver='rk4', *pars):
+def solve_to(f, x, t, t1, dt_max, solver='rk4', **kwargs):
     """
     :descript: Solves ODE f in the range t to t1 with initial condition x
     :param f: Function defining an ODE or ODE system
@@ -47,9 +47,9 @@ def solve_to(f, x, t, t1, dt_max, solver='rk4', *pars):
     while t < t1:
         dt = min(dt_max, t1 - t)
         if solver == 'euler':
-            x_new,t_new = euler_step(f, x, t, dt, *pars)
+            x_new,t_new = euler_step(f, x, t, dt, **kwargs)
         elif solver == 'rk4':
-            x_new,t_new = RK4_step(f, x, t, dt, *pars)
+            x_new,t_new = RK4_step(f, x, t, dt, **kwargs)
         x = x_new
         t = t_new
     return x_new, t_new
@@ -67,8 +67,8 @@ def solve_odes(f, x0, t0, t1, dt_max, solver='rk4', **kwargs):
     """
     t = t0
     x = np.array(x0)
-    n = int((t1 - t0) / dt_max)
-    sol = np.zeros((n+1, len(x0)))
+    n = math.ceil((t1 - t0) / dt_max)
+    sol = np.zeros((n+1, len(x0) if isinstance(x0, (list, tuple)) else 1))
     sol[0] = x
     for i in range(n):
         dt = min(dt_max, t1 - t)
@@ -77,41 +77,30 @@ def solve_odes(f, x0, t0, t1, dt_max, solver='rk4', **kwargs):
         elif solver == 'rk4':
             x, t = RK4_step(f, x, t, dt, **kwargs)
         sol[i+1] = x
-    return sol.T, np.linspace(t0, t1, n+1)
-
+    if sol.shape[1] > 2:
+        sol = sol.T
+    return np.array(sol), np.linspace(t0, t1, n+1)
 
 # Errors of the two methods plotted on the same graph
-def errors(f, h, x0, t0, t1, *pars):
-    """
-    :descript: Creates a loglog graph of the error produced from the rk4 and euler method
-    :param f: Function defining an ODE or ODE system
-    :param h: The size of the timestep increase
-    :param x0: Starting value of x
-    :param t0: Starting time value
-    :param t1: Final time value
-    :returns: None
-    """    
-    errorsEuler = []
-    errorsRK4 = []
-    dt_max = h
+def error_difference(f, x0, t0, t1, true_solution, pars):
+    rk4error = []
+    eulererror = []
+    timestep = np.logspace(-5, 0, 10)
+    for dt in timestep:
+        sol, t = solve_odes(f, x0, t0, t1, dt_max=dt, solver = 'rk4')
+        error = abs(sol[-1] - true_solution(pars))
+        rk4error.append(error)
 
-    for i in range(1000):
-        ans1 = solve_to(f, x0, t0, t1, dt_max, 'euler', *pars)[0]
-        error1 = abs(math.e - ans1)
-        errorsEuler.append(error1)
-        ans2 = solve_to(f, x0, t0, t1, dt_max,'rk4', *pars)[0]
-        error2 = abs(math.e - ans2)
-        errorsRK4.append(error2)
-        dt_max = dt_max + h
+        sol1, t2 = solve_odes(f, x0, t0, t1, dt_max=dt, solver = 'euler')
+        error1 = abs(sol1[-1] - true_solution(pars))
+        eulererror.append(error1)
 
-    tstep = np.linspace(h, dt_max, 1000)
-    plt.loglog(tstep, errorsEuler,'r', label = "Euler")
-    plt.loglog(tstep, errorsRK4, 'b', label = "RK4")
-    plt.xlabel('log(tstep)')
-    plt.ylabel('log(absolute error)')
-    plt.title('Size of Timestep Against Error Produced from the RK4 and Euler Methods')
-    plt.legend()
+    plt.loglog(timestep, rk4error, 'x-')
+    plt.loglog(timestep, eulererror, 'x-')
     plt.show()
+
+def euler_number(t):
+    return np.exp(t)
 
 #Time taken for the two methods over 1000 iterations
 def timing(f, x0, t0, t1, *pars):

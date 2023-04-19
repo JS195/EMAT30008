@@ -1,59 +1,131 @@
-import numpy as np 
+import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from Week_19_matrices import matrix_build, boundary_conditions, finite_grid
+import math
+import time
 
-def heat_equation(N, D, gamma1, gamma2, a, b, dt, dx, t):
-    A_matrix = matrix_build(N,D)
-    b_matrix = A_matrix @ boundary_conditions(N,gamma1,gamma2)
+def euler_step(f, x, t, dt, **kwargs):
+    """
+    :descript: Performs an euler step
+    :param f: Function defining an ODE or ODE system
+    :param x: Starting value of x
+    :param t: Starting time value
+    :param dt: Time step size
+    :returns: The value of x after one timestep, and the new value of t
+    """
+    x_new = x + dt * f(x, t, **kwargs)
+    t_new = t + dt
+    return x_new, t_new
 
-    U = np.zeros((N_time + 1,N-1))
-    U[0,:] = np.sin(np.pi*(x_int-a)/(b-a))
-    
-    for i in range(0,N_time-1):
-        U[i+1,:] = U[i,:] + (dt*D/dx**2)*(A_matrix@U[i,:]+b_matrix) 
+def RK4_step(f, x, t, dt, **kwargs):
+    """
+    :descript: Performs a step using the Runge-Kutta-4 method
+    :param f: Function defining an ODE or ODE system
+    :param x: Starting value of x
+    :param t: Starting time value
+    :param dt: Time step size
+    :returns: The value of x after one timestep, and the new value of t
+    """
+    k1 = dt * f(x, t, **kwargs)
+    k2 = dt * f(x + k1/2, t + dt/2, **kwargs)
+    k3 = dt * f(x + k2/2, t + dt/2, **kwargs)
+    k4 = dt * f(x + k3, t + dt, **kwargs)
+    x_new = x + (k1 + 2 * k2 + 2 * k3 + k4) / 6
+    t_new = t + dt
+    return x_new, t_new
 
-    u_true = np.zeros((N_time+1, N-1))
-    for n in range(0, N_time):
-        u_true[n,:] = np.exp(-(b-a)**2*D*np.pi**2*t[n]) * np.sin(np.pi*(x_int-a)/(b-a))
-    
-    return U, u_true
+def solve_odes(f, x0, t0, t1, dt_max, solver='rk4', **kwargs):
+    """
+    :descript: Solves ODE f in the range t to t1 with initial condition x
+    :param f: Function defining an ODE or ODE system
+    :param x0: Starting value of x
+    :param t0: Starting time value
+    :param t1: Final time value
+    :param dt_max: Maximum step size
+    :solver: Defines the solver to use (either 'euler' or 'rk4')
+    :returns: An array of x values at each time value 
+    """
+    t = t0
+    x = np.array(x0)
+    n = math.ceil((t1 - t0) / dt_max)
+    sol = np.zeros((n+1, len(x0) if isinstance(x0, (list, tuple)) else 1))
+    sol[0] = x
+    for i in range(n):
+        dt = min(dt_max, t1 - t)
+        if solver == 'euler':
+            x, t = euler_step(f, x, t, dt, **kwargs)
+        elif solver == 'rk4':
+            x, t = RK4_step(f, x, t, dt, **kwargs)
+        sol[i+1] = x
+    if sol.shape[1] > 2:
+        sol = sol.T
+    return np.array(sol), np.linspace(t0, t1, n+1)
 
-def animate_solution(U, u_true, x_int, N_time):
-    fig, ax = plt.subplots()
-    ax.set_ylim(0,1)
-    ax.set_xlabel(f'$x$')
-    ax.set_ylabel(f'$u(x,t)$')
+def func1(x ,t):
+    """
+    :descript: Defines the ODE dx/dt = x
+    :param x: Value of x
+    :param t: Time t
+    :returns: Value of dx/dt = x
+    """
+    return x
 
-    line, = ax.plot(x_int, u_true[0, :], label='True solution')
-    line2, = ax.plot(x_int, U[0, :], 'ro', label='Numerical solution')
 
-    def animate(i):
-        line.set_data((x_int, u_true[i,:]))
-        line2.set_data((x_int, U[i,:]))
-        return line, line2
 
-    ani = animation.FuncAnimation(fig, animate, frames=N_time, blit=False, interval=50)
-    ax.legend()
+def error_difference(f, x0, t0, t1, true_function, pars):
+    rk4error = []
+    eulererror = []
+    timestep = np.logspace(-5, 0, 10)
+    for dt in timestep:
+        sol, t = solve_odes(f, x0, t0, t1, dt_max=dt, solver = 'rk4')
+        error = abs(sol[-1] - true_function(pars))
+        rk4error.append(error)
+
+        sol1, t2 = solve_odes(f, x0, t0, t1, dt_max=dt, solver = 'euler')
+        error1 = abs(sol1[-1] - true_function(pars))
+        eulererror.append(error1)
+
+    plt.loglog(timestep, rk4error, 'x-')
+    plt.loglog(timestep, eulererror, 'x-')
     plt.show()
 
-def time_grid(N, a, b, C=0.49):
-    grid = finite_grid(N, a, b)
-    dx = grid[1]
-    x_int = grid[2]
-    dt = C*dx**2/D
-    t_final = 1
-    N_time = int(np.ceil(t_final/dt))
-    t = dt*np.arange(N_time)
-    return dt, dx, t, N_time, x_int
+def euler_number(t):
+    return np.exp(t)
 
-N=20
-a=0
-b=1
-gamma1=0.0
-gamma2=0.0
-D = 1
+pars = 1
 
-dt, dx, t, N_time, x_int = time_grid(N, a, b)
-U, u_true = heat_equation(N, D, gamma1, gamma2, a, b, dt, dx, t)
-animate_solution(U, u_true, x_int, N_time)
+error_difference(func1, x0=1, t0=0, t1=1, true_function = euler_number, pars = pars)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def predator_prey(X, t, pars):
+    x = X[0]
+    y = X[1]
+    a, b, d = pars[0], pars[1], pars[2]
+    dxdt = x * (1 - x) - (a * x * y) / (d + x)
+    dydt = b * y * (1 - (y / x))
+    return np.array([dxdt, dydt])
+
+pars = [1.0, 0.25, 0.1]
+# Behaviour in the long-time limit
+sol, t = solve_odes(predator_prey, x0=[1,1], t0=0, t1=200, dt_max=0.01, solver='rk4', pars=pars)
+sol = sol.T
+plt.plot(t, sol[0], label='prey population')
+plt.plot(t, sol[1], label='predator population')
+plt.legend()
+plt.show()
