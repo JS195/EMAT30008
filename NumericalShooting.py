@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import math
 from scipy.optimize import fsolve
 from scipy.signal import find_peaks
-from TestingFunctions import predator_prey, pred_prey_pc
+from TestingFunctions import predator_prey, pred_prey_pc, hopf, hopf_pc
 from ODEsolver import solve_odes, plot_different_parameters
 
 def plot_phase_portrait(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.01, solver='rk4', **kwargs):
@@ -29,7 +29,7 @@ def plot_phase_portrait(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.0
 
 def iso_orbit(f, x0, t0, t1, dt_max, **kwargs):
     """
-    Finds the limit cycle period and amplitude for a system of ODEs using the Runge-Kutta 
+    Finds the limit cycle initial conditions and time period for a system of ODEs using the Runge-Kutta 
     4th order solver.
 
     :param f: Function defining a system of ODEs.
@@ -39,8 +39,7 @@ def iso_orbit(f, x0, t0, t1, dt_max, **kwargs):
     :param dt_max: Maximum step size.
     :param **kwargs: Optional. Any additional input keyword arguments.
     
-    :returns: A list containing the amplitude of the limit cycle in the x-direction, the 
-    amplitude of the limit cycle in the y-direction, and the period of the limit cycle, if 
+    :returns: A list containing the initial conditons, and the time period of the limit cycle, if 
     one exists. If no limit cycle is found, returns None.
     """
     sol, t = solve_odes(f, x0, t0, t1, dt_max, 'rk4', **kwargs)
@@ -105,14 +104,14 @@ def shooting(f, phase_cond):
 
 def find_shoot_orbit(f, phase_cond, u0T, pars):
     """
-    Find the periodic orbit of a dynamical system using the shooting method.
+    Finds the periodic orbit of a dynamical system using the shooting method.
 
     :param f: Function defining the dynamical system.
     :param phase_cond: Function defining the phase condition of the periodic orbit.
     :param u0T: Initial guess for the period and the initial condition of the orbit.
     :param pars: Parameters for the dynamical system.
 
-    :returns: The periodic orbit as an array.
+    :returns: The initial conditions and the time period or the orbit as an array.
     """
     orbit = fsolve(shooting(f, phase_cond), u0T, pars)
     return orbit
@@ -121,18 +120,28 @@ def main():
     params = [[1.0, 0.1, 0.1], [1.0, 0.25, 0.1], [1.0, 0.4, 0.1]]
     plot_different_parameters(predator_prey, x0=[1,1], t0=0, t1=200, dt_max=0.01, params=params)
 
+    #Plotting phase portrait
+    plot_phase_portrait(pars=pars)
+
     # Isolate periodic orbit
     orbit = iso_orbit(predator_prey, x0=[1,1], t0=0, t1=500, dt_max=0.01, pars=[1.0,0.2,0.1])
-    print(orbit)
+    print('The true values of the predator prey orbit:', orbit)
 
     #Predator Prey shooting/ root finding
     pars = [1.0, 0.2, 0.1]
     u0T = [0.6, 0.3, 20]
     shooting_orbit = find_shoot_orbit(predator_prey, pred_prey_pc, u0T, pars)
-    print(shooting_orbit)
+    print('The shooting values of the predator prey orbit: ', shooting_orbit)
 
-    #Plotting phase portrait
-    plot_phase_portrait(pars=pars)
+    #Testing the shooting code using the supercritical Hopf bifurcation
+    pars = [0.3, -1]
+    orbit = iso_orbit(hopf, [1,1], 0, 200, 0.01, pars=pars)
+    print('The true values of the hopf orbit:', orbit)
+
+    #Using the true values of the hopf orbit as an approximate guess for the shooting
+    u0T = [0.6, 0.001, 6]
+    shooting_orbit = find_shoot_orbit(hopf, hopf_pc, u0T, pars)
+    print('The shooting values of the hopf orbit: ', shooting_orbit)
 
 if __name__ == "__main__":
     main()

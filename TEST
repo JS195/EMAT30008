@@ -1,45 +1,14 @@
-import numpy as np
-from scipy.optimize import fsolve
-import math
-import matplotlib.pyplot as plt
+from NumericalShooting import find_shoot_orbit, iso_orbit
+from TestingFunctions import hopf, hopf_pc
 
-def RK4_step(f, x, t, dt, **kwargs):
-    k1 = dt * f(x, t, **kwargs)
-    k2 = dt * f(x + k1/2, t + dt/2, **kwargs)
-    k3 = dt * f(x + k2/2, t + dt/2, **kwargs)
-    k4 = dt * f(x + k3, t + dt, **kwargs)
-    x_new = x + (k1 + 2 * k2 + 2 * k3 + k4) / 6
-    t_new = t + dt
-    return x_new, t_new
+pars = [0.3, -1.0]
+#u0T = [0.6, 0.3, 20]
+#shooting_orbit = find_shoot_orbit(hopf, hopf_pc, u0T, pars)
+#print(shooting_orbit)
 
-def solve_odes(f, x0, t0, t1, dt_max, solver='rk4', **kwargs):
-    t = t0
-    x = np.array(x0)
-    n = math.ceil((t1 - t0) / dt_max)
-    sol = np.zeros((n+1, len(x0) if isinstance(x0, (list, tuple, np.ndarray)) else 1))
-    sol[0] = x
-    for i in range(n):
-        dt = min(dt_max, t1 - t)
-        if solver == 'euler':
-            x, t = euler_step(f, x, t, dt, **kwargs)
-        elif solver == 'rk4':
-            x, t = RK4_step(f, x, t, dt, **kwargs)
-        sol[i+1] = x
-    return np.array(sol), np.linspace(t0, t1, n+1)
+orbit = iso_orbit(hopf, [1,1], 0, 200, 0.01, pars=pars)
+print(orbit)
 
-def predator_prey(X, t, pars):
-    x = X[0]
-    y = X[1]
-    a, b, d = pars[0], pars[1], pars[2]
-    dxdt = x * (1 - x) - (a * x * y) / (d + x)
-    dydt = b * y * (1 - (y / x))
-    return np.array([dxdt, dydt])
-
-def pred_prey_pc(x0, pars):
-    return predator_prey(x0, 0, pars)[0]
-
-
-pars = [1.0, 0.25, 0.1]
-sol, t = solve_odes(predator_prey, x0=[1,1], t0=0, t1=500, dt_max=0.01, solver='rk4', pars=pars)
-plt.plot(sol[:,0], sol[:,1])
-plt.show()
+u0T = [0.6, 0.001, 6]
+shooting_orbit = find_shoot_orbit(hopf, hopf_pc, u0T, pars)
+print(shooting_orbit)
