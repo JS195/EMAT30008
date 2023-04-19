@@ -6,11 +6,14 @@ from TestingFunctions import euler_number, true_euler_number, predator_prey, fun
 
 def euler_step(f, x, t, dt, **kwargs):
     """
-    :descript: Performs an euler step
+    Performs a step using the Euler method
+
     :param f: Function defining an ODE or ODE system
     :param x: Starting value of x
     :param t: Starting time value
     :param dt: Time step size
+    :param kwargs: Any additional input keyword arguments
+
     :returns: The value of x after one timestep, and the new value of t
     """
     x_new = x + dt * f(x, t, **kwargs)
@@ -19,11 +22,14 @@ def euler_step(f, x, t, dt, **kwargs):
 
 def RK4_step(f, x, t, dt, **kwargs):
     """
-    :descript: Performs a step using the Runge-Kutta-4 method
+    Performs a step using the Runge-Kutta-4 method
+
     :param f: Function defining an ODE or ODE system
     :param x: Starting value of x
     :param t: Starting time value
     :param dt: Time step size
+    :param kwargs: Any additional input keyword arguments
+
     :returns: The value of x after one timestep, and the new value of t
     """
     k1 = dt * f(x, t, **kwargs)
@@ -36,13 +42,16 @@ def RK4_step(f, x, t, dt, **kwargs):
 
 def solve_odes(f, x0, t0, t1, dt_max, solver='rk4', **kwargs):
     """
-    :descript: Solves ODE f in the range t to t1 with initial condition x
+    Solves ODE f in the range t to t1 with initial condition x
+
     :param f: Function defining an ODE or ODE system
     :param x0: Starting value of x
     :param t0: Starting time value
     :param t1: Final time value
     :param dt_max: Maximum step size
     :solver: Defines the solver to use (either 'euler' or 'rk4')
+    :param kwargs: Any additional input keyword arguments
+
     :returns: An array of x values at each time value 
     """
     t = t0
@@ -59,8 +68,21 @@ def solve_odes(f, x0, t0, t1, dt_max, solver='rk4', **kwargs):
         sol[i+1] = x
     return np.array(sol), np.linspace(t0, t1, n+1)
 
-# Errors of the two methods plotted on the same graph
 def error_difference(f, x0, t0, t1, true_solution, pars):
+    """
+    Calculates the difference in error between two ODE solvers (Euler and Runge-Kutta 4th order) 
+    for a given ODE function and true solution, at different timestep values.
+
+    :param f: Function defining an ODE or ODE system.
+    :param x0: Starting value of x.
+    :param t0: Starting time value.
+    :param t1: Final time value.
+    :param true_solution: Function defining the true solution to the ODE.
+    :param pars: Parameters required to calculate the true solution.
+    
+    :returns: None (displays a plot of the error difference between the two solvers for different 
+    timestep values).
+    """
     rk4error = []
     eulererror = []
     timestep = np.logspace(-5, 2, 15)
@@ -78,6 +100,20 @@ def error_difference(f, x0, t0, t1, true_solution, pars):
     plt.show()
 
 def plot_different_parameters(f, x0, t0, t1, dt_max, params, solver='rk4'):
+    """
+    Plots the solution of a system of ODEs for different parameter values using a specified solver.
+
+    :param f: Function defining a system of ODEs.
+    :param x0: Starting value of the dependent variable(s).
+    :param t0: Starting time value.
+    :param t1: Final time value.
+    :param dt_max: Maximum step size.
+    :param params: List of dictionaries, where each dictionary contains the parameter values required 
+    by the ODE system.
+    :param solver: Defines the solver to use (either 'euler' or 'rk4').
+    
+    :returns: None (displays a plot of the solution of the ODE system for different parameter values).
+    """
     fig, axs = plt.subplots(1, len(params), figsize=(12, 4))
     for i, p in enumerate(params):
         sol, t = solve_odes(f, x0, t0, t1, dt_max, solver, pars=p)
@@ -93,7 +129,7 @@ def plot_different_parameters(f, x0, t0, t1, dt_max, params, solver='rk4'):
 
 def main():
     pars = 1
-    error_difference(euler_number, x0=1, t0=0, t1=1, true_solution = true_euler_number, pars = pars)
+    error_difference(euler_number, x0=1, t0=0, t1=1, true_solution = true_euler_number, pars = 1)
 
     sol, t = solve_odes(func2, x0=[1,1], t0=0, t1=20, dt_max=0.01)
     plt.plot(sol)

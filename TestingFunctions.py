@@ -1,23 +1,34 @@
 import numpy as np
 
-def euler_number(x ,t):
+def euler_number(x, t):
     """
-    :descript: Defines the ODE dx/dt = x
-    :param x: Value of x
-    :param t: Time t
-    :returns: Value of dx/dt = x
+    Defines the ODE dx/dt = x.
+
+    :param x: Value of x.
+    :param t: Time t.
+
+    :returns: Value of dx/dt = x.
     """
     return x
 
 def true_euler_number(t):
+    """
+    Defines the true solution of dx/dt = x.
+
+    :param t: Time t.
+
+    :returns: Value of dx/dt = x at time t.
+    """
     return np.exp(t)
 
 def func2(x ,t):
     """
-    :descript: Defines the second order ODE d_xx = -x
-    :param x: A vector of parameter values (x, y)
-    :param t: Time value
-    :returns: An array of dx/dt = y and dy/dt = -x at (x, t) 
+    Defines the second order ODE d_xx = -x.
+
+    :param x: A vector of parameter values (x, y).
+    :param t: Time value.
+
+    :returns: An array of dx/dt = y and dy/dt = -x at (x, t).
     """
     X = x[0]
     y = x[1]
@@ -27,11 +38,13 @@ def func2(x ,t):
 
 def predator_prey(X, t, pars):
     """
-    :descript: Defines the predator-prey equations
-    :param X: Vector of (x, y) values
-    :param t: Time value
-    :param pars: Other paramters required to define the equation (a, b, d)
-    :returns: Array of derivatives dx/dt and dy/dt
+    Defines the predator-prey equations
+
+    :param X: Vector of (x, y) values.
+    :param t: Time value.
+    :param pars: Other paramters required to define the equation (a, b, d).
+
+    :returns: Array of derivatives dx/dt and dy/dt.
     """
     x = X[0]
     y = X[1]
@@ -42,20 +55,24 @@ def predator_prey(X, t, pars):
 
 def pred_prey_pc(x0, pars):
     """
-    :descript: Returns the predator-prey phase condition of dx/dt(0) = 0
-    :param x0: The initial condition for the ODE system
-    :param *pars: Additional arguments to pass to the predator-prey funtion
-    :returns: The phase condition of the predator-prey system
+    Returns the predator-prey phase condition of dx/dt(0) = 0.
+
+    :param x0: The initial condition for the ODE system.
+    :param pars: Additional arguments to pass to the predator-prey funtion.
+
+    :returns: The phase condition of the predator-prey system.
     """
     return predator_prey(x0, 0, pars)[0]
 
 def hopf(U, t, pars):
     """
-    :descript: Defines the predator-prey equations
-    :param X: Vector of (x, y) values
-    :param t: Time value
-    :param pars: Other paramters required to define the equation (a, b, d)
-    :returns: Array of derivatives dx/dt and dy/dt
+    Defines the predator-prey equations.
+
+    :param X: Vector of (x, y) values.
+    :param t: Time value.
+    :param pars: Other paramters required to define the equation (a, b, d).
+
+    :returns: Array of derivatives dx/dt and dy/dt.
     """
     u1 = U[0]
     u2 = U[1]
@@ -66,9 +83,11 @@ def hopf(U, t, pars):
 
 def hopf_pc(x0, pars):
     """
-    :descript: Returns the predator-prey phase condition of dx/dt(0) = 0
-    :param x0: The initial condition for the ODE system
-    :param *pars: Additional arguments to pass to the predator-prey funtion
-    :returns: The phase condition of the predator-prey system
+    Returns the predator-prey phase condition of dx/dt(0) = 0.
+
+    :param x0: The initial condition for the ODE system.
+    :param *pars: Additional arguments to pass to the predator-prey funtion.
+
+    :returns: The phase condition of the predator-prey system.
     """
     return hopf(x0, 0, pars)[0]

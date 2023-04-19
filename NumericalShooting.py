@@ -8,15 +8,17 @@ from ODEsolver import solve_odes, plot_different_parameters
 
 def plot_phase_portrait(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.01, solver='rk4', **kwargs):
     """
-    :descript: Plots the phase portrait of an ODE or ODE system
-    :param func: The function defining the ODE or ODE system
-    :param x0: The initial condition for the ODE system
-    :param t0: The initial time for the ODE system
-    :param t1: The final time for the ODE system
-    :param dt_max: The maximum time step size allowed by the solver
-    :param solver: The ODE solver to use. Should be one of 'rk4' (default) or 'euler'
-    :param **kwargs: Additional keyword arguments to pass to the ODE solver
-    :returns: None
+    Plots the phase portrait of an ODE or ODE system.
+    
+    :param func: The function defining the ODE or ODE system.
+    :param x0: The initial condition for the ODE system.
+    :param t0: The initial time for the ODE system.
+    :param t1: The final time for the ODE system.
+    :param dt_max: The maximum time step size allowed by the solver.
+    :param solver: The ODE solver to use. Should be one of 'rk4' (default) or 'euler'.
+    :param **kwargs: Optional. Additional keyword arguments to pass to the ODE solver.
+
+    :returns: None, but produces a plot of the phase portrait.
     """
     sol, t = solve_odes(func, x0=x0, t0=t0, t1=t1, dt_max=dt_max, solver=solver, **kwargs)
     plt.plot(sol[:,0], sol[:,1])
@@ -26,6 +28,21 @@ def plot_phase_portrait(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.0
     plt.show()
 
 def iso_orbit(f, x0, t0, t1, dt_max, **kwargs):
+    """
+    Finds the limit cycle period and amplitude for a system of ODEs using the Runge-Kutta 
+    4th order solver.
+
+    :param f: Function defining a system of ODEs.
+    :param x0: Starting value of the dependent variable(s).
+    :param t0: Starting time value.
+    :param t1: Final time value.
+    :param dt_max: Maximum step size.
+    :param **kwargs: Optional. Any additional input keyword arguments.
+    
+    :returns: A list containing the amplitude of the limit cycle in the x-direction, the 
+    amplitude of the limit cycle in the y-direction, and the period of the limit cycle, if 
+    one exists. If no limit cycle is found, returns None.
+    """
     sol, t = solve_odes(f, x0, t0, t1, dt_max, 'rk4', **kwargs)
     x_coords = sol[:, 0]
     y_coords = sol[:, 1]
@@ -43,8 +60,42 @@ def iso_orbit(f, x0, t0, t1, dt_max, **kwargs):
     return None
 
 def shooting(f, phase_cond):
+    """
+    Solves a boundary value problem using the shooting method.
+
+    :param f: Function defining a system of ODEs.
+    :param phase_cond: Function defining the boundary conditions to be satisfied.
+    
+    :returns: A function G that takes as input a list u0T representing the initial guess 
+    for the solution, and a dictionary of parameter values, and returns the difference between 
+    the actual boundary condition and the initial guess boundary condition.
+    """
     def G(u0T, pars):
+        """
+        Defines a function G that is used by the shooting method to solve a boundary value problem.
+
+        :param u0T: List representing the initial guess for the solution, where the last element 
+        is the guess for the final time value, and the remaining elements are the guess for the 
+        initial value(s).
+        :param pars: Dictionary of parameter values.
+        
+        :returns: A numpy array representing the difference between the actual boundary condition 
+        and the initial guess boundary condition. The first elements of the array correspond to the 
+        difference between the actual and guessed initial value(s), while the last element corresponds 
+        to the difference between the actual and guessed final time value.
+        """
         def F(u0, T):
+            """
+            Solves a boundary value problem with shooting method.
+
+            :param f: Function defining an ODE or ODE system.
+            :param phase_cond: Function defining the boundary conditions.
+            :param u0T: Array of initial guesses for the solution and the final time.
+            :param pars: Any additional input parameters.
+            
+            :returns: Array of residuals between the boundary conditions and the solution obtained by 
+            the shooting method.
+            """
             sol, t = solve_odes(f, x0=u0, t0=0, t1=T, dt_max=0.01, solver='rk4', pars=pars)
             final_sol = sol[-1, :]
             return final_sol
@@ -53,6 +104,16 @@ def shooting(f, phase_cond):
     return G
 
 def find_shoot_orbit(f, phase_cond, u0T, pars):
+    """
+    Find the periodic orbit of a dynamical system using the shooting method.
+
+    :param f: Function defining the dynamical system.
+    :param phase_cond: Function defining the phase condition of the periodic orbit.
+    :param u0T: Initial guess for the period and the initial condition of the orbit.
+    :param pars: Parameters for the dynamical system.
+
+    :returns: The periodic orbit as an array.
+    """
     orbit = fsolve(shooting(f, phase_cond), u0T, pars)
     return orbit
 
