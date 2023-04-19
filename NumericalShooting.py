@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from ODEsolver import solve_odes
+from Archive.OldODEsolver import solve_odes
 from scipy.signal import find_peaks
 from scipy.integrate import solve_ivp
 from scipy.optimize import fsolve
@@ -19,6 +19,21 @@ def predator_prey(X, t, pars):
     dxdt = x * (1 - x) - (a * x * y) / (d + x)
     dydt = b * y * (1 - (y / x))
     return np.array([dxdt, dydt])
+
+def hopf(U, t, pars):
+    """
+    :descript: Defines the predator-prey equations
+    :param X: Vector of (x, y) values
+    :param t: Time value
+    :param pars: Other paramters required to define the equation (a, b, d)
+    :returns: Array of derivatives dx/dt and dy/dt
+    """
+    u1 = U[0]
+    u2 = U[1]
+    beta, sigma = pars[0], pars[1]
+    du1dt = beta * u1 -u2 + sigma*u1*(u1**2 + u2**2)
+    du2dt = u1 + beta*u2 + sigma*u2*(u1**2 + u2**2)
+    return np.array([du1dt, du2dt])
 
 def long_term_behaviour():
     """
@@ -89,7 +104,7 @@ def isolate_orbit(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.01, sol
         previous_time = t[i]
     raise RuntimeError("No orbit found")
 
-def phase_condition(x0, *pars):
+def pred_prey_pc(x0, *pars):
     """
     :descript: Returns the predator-prey phase condition of dx/dt(0) = 0
     :param x0: The initial condition for the ODE system
@@ -97,6 +112,15 @@ def phase_condition(x0, *pars):
     :returns: The phase condition of the predator-prey system
     """
     return predator_prey(x0, 0, *pars)[0]
+
+def hopf_pc(x0, *pars):
+    """
+    :descript: Returns the predator-prey phase condition of dx/dt(0) = 0
+    :param x0: The initial condition for the ODE system
+    :param *pars: Additional arguments to pass to the predator-prey funtion
+    :returns: The phase condition of the predator-prey system
+    """
+    return hopf(x0, 0, *pars)[0]
 
 def shooting(f):
     """
@@ -126,7 +150,7 @@ def shooting(f):
             final_sol = sol.y[:,-1]
             return final_sol
         T, u0 = u0T[-1], u0T[:-1]
-        return np.append(u0 - F(u0, T), phase_condition(u0, pars))
+        return np.append(u0 - F(u0, T), hopf_pc(u0, pars))
     return G
 
 def find_shooting_orbit(f, u0T, pars):
@@ -141,8 +165,20 @@ def find_shooting_orbit(f, u0T, pars):
     shooting_orbit = fsolve_sol[0]
     return shooting_orbit
 
+def main():
 
-pars = [1.0, 0.1, 0.1]
-pred_prey_u0T = np.array([0.8,0.2,30])
-found_shooting_orbit = find_shooting_orbit(predator_prey, pred_prey_u0T, pars)
-print(found_shooting_orbit)
+    #Part 1 predator prey
+    pars = [1.0, 0.1, 0.1]
+    pred_prey_u0T = np.array([0.8,0.2,30])
+    found_shooting_orbit = find_shooting_orbit(predator_prey, pred_prey_u0T, pars)
+    print(found_shooting_orbit)
+
+    #Hopf 
+    plot_phase_portrait(func=hopf,  x0=[1, 1], t0=0, t1=200, dt_max=0.01, solver='rk4', pars=(0, -1))
+    pars = [0, -1]
+    hopf_u0T = np.array([2,4,30])
+    found_shooting_orbit = find_shooting_orbit(hopf, hopf_u0T, pars)
+    print(found_shooting_orbit)
+
+if __name__ == "__main__":
+    main()

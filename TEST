@@ -1,117 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import math
-import time
-
-def euler_step(f, x, t, dt, **kwargs):
-    """
-    :descript: Performs an euler step
-    :param f: Function defining an ODE or ODE system
-    :param x: Starting value of x
-    :param t: Starting time value
-    :param dt: Time step size
-    :returns: The value of x after one timestep, and the new value of t
-    """
-    x_new = x + dt * f(x, t, **kwargs)
-    t_new = t + dt
-    return x_new, t_new
-
-def RK4_step(f, x, t, dt, **kwargs):
-    """
-    :descript: Performs a step using the Runge-Kutta-4 method
-    :param f: Function defining an ODE or ODE system
-    :param x: Starting value of x
-    :param t: Starting time value
-    :param dt: Time step size
-    :returns: The value of x after one timestep, and the new value of t
-    """
-    k1 = dt * f(x, t, **kwargs)
-    k2 = dt * f(x + k1/2, t + dt/2, **kwargs)
-    k3 = dt * f(x + k2/2, t + dt/2, **kwargs)
-    k4 = dt * f(x + k3, t + dt, **kwargs)
-    x_new = x + (k1 + 2 * k2 + 2 * k3 + k4) / 6
-    t_new = t + dt
-    return x_new, t_new
-
-def solve_odes(f, x0, t0, t1, dt_max, solver='rk4', **kwargs):
-    """
-    :descript: Solves ODE f in the range t to t1 with initial condition x
-    :param f: Function defining an ODE or ODE system
-    :param x0: Starting value of x
-    :param t0: Starting time value
-    :param t1: Final time value
-    :param dt_max: Maximum step size
-    :solver: Defines the solver to use (either 'euler' or 'rk4')
-    :returns: An array of x values at each time value 
-    """
-    t = t0
-    x = np.array(x0)
-    n = math.ceil((t1 - t0) / dt_max)
-    sol = np.zeros((n+1, len(x0) if isinstance(x0, (list, tuple)) else 1))
-    sol[0] = x
-    for i in range(n):
-        dt = min(dt_max, t1 - t)
-        if solver == 'euler':
-            x, t = euler_step(f, x, t, dt, **kwargs)
-        elif solver == 'rk4':
-            x, t = RK4_step(f, x, t, dt, **kwargs)
-        sol[i+1] = x
-    if sol.shape[1] > 2:
-        sol = sol.T
-    return np.array(sol), np.linspace(t0, t1, n+1)
-
-def func1(x ,t):
-    """
-    :descript: Defines the ODE dx/dt = x
-    :param x: Value of x
-    :param t: Time t
-    :returns: Value of dx/dt = x
-    """
-    return x
-
-
-
-def error_difference(f, x0, t0, t1, true_function, pars):
-    rk4error = []
-    eulererror = []
-    timestep = np.logspace(-5, 0, 10)
-    for dt in timestep:
-        sol, t = solve_odes(f, x0, t0, t1, dt_max=dt, solver = 'rk4')
-        error = abs(sol[-1] - true_function(pars))
-        rk4error.append(error)
-
-        sol1, t2 = solve_odes(f, x0, t0, t1, dt_max=dt, solver = 'euler')
-        error1 = abs(sol1[-1] - true_function(pars))
-        eulererror.append(error1)
-
-    plt.loglog(timestep, rk4error, 'x-')
-    plt.loglog(timestep, eulererror, 'x-')
-    plt.show()
-
-def euler_number(t):
-    return np.exp(t)
-
-pars = 1
-
-error_difference(func1, x0=1, t0=0, t1=1, true_function = euler_number, pars = pars)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+from scipy.optimize import fsolve
+from ODEsolver import solve_odes
 
 def predator_prey(X, t, pars):
     x = X[0]
@@ -121,11 +10,14 @@ def predator_prey(X, t, pars):
     dydt = b * y * (1 - (y / x))
     return np.array([dxdt, dydt])
 
-pars = [1.0, 0.25, 0.1]
-# Behaviour in the long-time limit
-sol, t = solve_odes(predator_prey, x0=[1,1], t0=0, t1=200, dt_max=0.01, solver='rk4', pars=pars)
-sol = sol.T
-plt.plot(t, sol[0], label='prey population')
-plt.plot(t, sol[1], label='predator population')
-plt.legend()
-plt.show()
+pars = [1.0, 0.2, 0.1]
+u0 = [0.5779027054793053, 0.2860464315137474]
+def objective(v0):
+    sol,t = solve_odes(predator_prey, x0=u0, t0=0, t1=500, dt_max=0.01, pars=pars)
+    print(sol.size)
+    print(objective)
+    return sol[:,-1]
+
+v0, = fsolve(objective, 20)
+print(v0)
+

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 from scipy.optimize import root
 from scipy.optimize import fsolve
-from ODEsolver import solve_odes
+from Archive.OldODEsolver import solve_odes
 from scipy.signal import find_peaks
 
 # Predator-prey function
@@ -17,8 +17,10 @@ def predator_prey(X, t, pars):
 
 pars = [1.0, 0.25, 0.1]
 # Behaviour in the long-time limit
-t = np.linspace(0, 200, 1000)
 sol, t = solve_odes(predator_prey, x0=[1,1], t0=0, t1=200, dt_max=0.01, solver='rk4', pars=pars)
+sol = sol.T
+print(sol[0])
+print(sol[1])
 plt.plot(t, sol[0], label='prey population')
 plt.plot(t, sol[1], label='predator population')
 plt.legend()

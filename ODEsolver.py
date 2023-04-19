@@ -2,20 +2,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import time
-from TestingFunctions import euler_number, true_euler_number, predator_prey
+from TestingFunctions import euler_number, true_euler_number, predator_prey, func2
 
-def euler_step(f, x, t, dt, **kwargs):
+def predator_prey(X, t, pars):
     """
-    :descript: Performs an euler step
-    :param f: Function defining an ODE or ODE system
-    :param x: Starting value of x
-    :param t: Starting time value
-    :param dt: Time step size
-    :returns: The value of x after one timestep, and the new value of t
+    :descript: Defines the predator-prey equations
+    :param X: Vector of (x, y) values
+    :param t: Time value
+    :param pars: Other paramters required to define the equation (a, b, d)
+    :returns: Array of derivatives dx/dt and dy/dt
     """
-    x_new = x + dt * f(x, t, **kwargs)
-    t_new = t + dt
-    return x_new, t_new
+    x = X[0]
+    y = X[1]
+    a, b, d = pars[0], pars[1], pars[2]
+    dxdt = x * (1 - x) - (a * x * y) / (d + x)
+    dydt = b * y * (1 - (y / x))
+    return np.array([dxdt, dydt])
 
 def RK4_step(f, x, t, dt, **kwargs):
     """
@@ -95,8 +97,9 @@ def main():
     pars = 1
     error_difference(euler_number, x0=1, t0=0, t1=1, true_solution = true_euler_number, pars = pars)
 
-    params = [[1.0, 0.1, 0.1], [1.0, 0.25, 0.1], [1.0, 0.4, 0.1]]
-    plot_different_parameters(predator_prey, x0=[1,1], t0=0, t1=200, dt_max=0.01, params=params)
+    sol, t = solve_odes(func2, x0=[1,1], t0=0, t1=20, dt_max=0.01)
+    plt.plot(sol)
+    plt.show()
 
 if __name__ == "__main__":
     main()

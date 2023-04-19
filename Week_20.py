@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from Week_19 import matrix_build, boundary_conditions, finite_grid
-from ODEsolver import RK4_step
+from Archive.OldODEsolver import RK4_step
 
 def f_euler(N, D, gamma1, gamma2, a, b, dt, dx, t, N_time, x_int):
     A_matrix = matrix_build(N,D)
