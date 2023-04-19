@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import math
 from scipy.optimize import fsolve
 from scipy.signal import find_peaks
-from TestingFunctions import predator_prey, pred_prey_pc, hopf, hopf_pc
+from Functions_and_ODEs import predator_prey, pred_prey_pc, hopf, hopf_pc
 from ODEsolver import solve_odes, plot_different_parameters
 
 def plot_phase_portrait(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.01, solver='rk4', **kwargs):

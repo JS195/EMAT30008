@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import time
-from TestingFunctions import euler_number, true_euler_number, predator_prey, func2
+from Functions_and_ODEs import euler_number, true_euler_number, predator_prey, func2
 
 def euler_step(f, x, t, dt, **kwargs):
     """
