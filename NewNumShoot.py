@@ -43,21 +43,19 @@ def iso_orbit(f, x0, t0, t1, dt_max, **kwargs):
         previous_peak_value = x_coords[current_peak_index]
     return None
 
-def shooting():
+def shooting(f, phase_cond):
     def G(u0T, pars):
         def F(u0, T):
-            sol, t = solve_odes(predator_prey, x0=u0, t0=0, t1=T, dt_max=0.01, solver='rk4', pars=pars)
+            sol, t = solve_odes(f, x0=u0, t0=0, t1=T, dt_max=0.01, solver='rk4', pars=pars)
             final_sol = sol[-1, :]
             return final_sol
         T, u0 = u0T[-1], u0T[:-1]
-        return np.append(u0 - F(u0, T), pred_prey_pc(u0, pars=pars))
+        return np.append(u0 - F(u0, T), phase_cond(u0, pars=pars))
     return G
 
-pars = [1.0, 0.2, 0.1]
-u0T = [0.57, 0.28, 20]
-
-orbit = fsolve(shooting(), u0T, pars)
-print("Orbit: ", orbit)
+def find_shoot_orbit(f, phase_cond, u0T, pars):
+    orbit = fsolve(shooting(f, phase_cond), u0T, pars)
+    return orbit
 
 def main():
     params = [[1.0, 0.1, 0.1], [1.0, 0.25, 0.1], [1.0, 0.4, 0.1]]
@@ -69,10 +67,9 @@ def main():
 
     #Predator Prey shooting/ root finding
     pars = [1.0, 0.2, 0.1]
-    pred_prey_u0T = np.array([0.6,0.3])
-    found_shooting_orbit = find_shooting_orbit(predator_prey, pred_prey_u0T, pars)
-    print(found_shooting_orbit)
-
+    u0T = [0.6, 0.3, 20]
+    shooting_orbit = find_shoot_orbit(predator_prey, pred_prey_pc, u0T, pars)
+    print(shooting_orbit)
 
 if __name__ == "__main__":
     main()
