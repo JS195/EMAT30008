@@ -111,3 +111,9 @@ def hopf_bif(X, t, pars):
 
 def hopf_bif_pc(x0, pars):
     return hopf_bif(x0, 0, pars)[0]
+
+def cubic(x, pars):
+    a = 1
+    b = 0
+    c = -1
+    return a * x**3 + b * x**2 + c * x + pars

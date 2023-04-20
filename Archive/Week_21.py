@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from Week_19 import matrix_build, boundary_conditions
-from Week_20 import time_grid
 import scipy.interpolate
+from Week_19 import matrix_build, boundary_conditions
+from Archive.Week_20 import time_grid
 
-def b_euler(N, a, b, gamma1, gamma2, D):
+def implicit_euler(N, a, b, gamma1, gamma2, D):
     dt, dx, t, N_time, x_int = time_grid(N, a, b, D)
     C = 0.1/dx**2
     A_matrix = matrix_build(N, D)
@@ -37,7 +37,7 @@ def interp_comparison(x, t, N, a, b, gamma1, gamma2, D):
     U, x_int = crank(N, a, b, gamma1, gamma2, D)
     y_interp = scipy.interpolate.interp1d(U[t,:], x_int, kind='linear')
     print('crank nichol = ', y_interp(x))
-    U, x_int = b_euler(N, a, b, gamma1, gamma2, D)
+    U, x_int = implicit_euler(N, a, b, gamma1, gamma2, D)
     y_interp = scipy.interpolate.interp1d(U[t,:], x_int, kind='linear')
     print('backwards euler = ', y_interp(x))
 
@@ -52,7 +52,7 @@ def main():
 
     # Part 1, backwards Euler demonstration
     # Plot the solution for timestep t = 0
-    U, x_int = b_euler(N, a, b, gamma1, gamma2, D)
+    U, x_int = implicit_euler(N, a, b, gamma1, gamma2, D)
     print(U)
     plt.plot(x_int, U[0,:], 'ro', label='solution for t=0')
     plt.legend()

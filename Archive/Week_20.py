@@ -4,7 +4,7 @@ import matplotlib.animation as animation
 from Week_19 import matrix_build, boundary_conditions, finite_grid
 from Archive.OldODEsolver import RK4_step
 
-def f_euler(N, D, gamma1, gamma2, a, b, dt, dx, t, N_time, x_int):
+def explicit_euler(N, D, gamma1, gamma2, a, b, dt, dx, t, N_time, x_int):
     A_matrix = matrix_build(N,D)
     b_matrix = A_matrix @ boundary_conditions(N,gamma1,gamma2)
 
@@ -77,7 +77,7 @@ def main():
     D = 1
 
     dt, dx, t, N_time, x_int = time_grid(N, a, b, D)
-    U, u_true = heat_equation_RK4(N, D, gamma1, gamma2, a, b, dt, dx, t, x_int)
+    U, u_true = explicit_euler(N, D, gamma1, gamma2, a, b, dt, dx, t, N_time, x_int)
     animate_solution(U, u_true, x_int, N_time)
 
 if __name__ == "__main__":
