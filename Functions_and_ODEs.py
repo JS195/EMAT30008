@@ -102,3 +102,12 @@ def three_dim_hopf(U, t, pars):
 
 def three_dim_hopf_pc(x0, pars):
     return three_dim_hopf(x0, 0, pars)[0]
+
+def hopf_bif(X, t, pars):
+    (u1, u2) = X
+    du1dt = (pars * u1) - u2 - (u1 * (u1**2 + u2**2))
+    du2dt = u1 + (pars * u2) - (u2 * (u1**2 + u2 ** 2))
+    return np.array([du1dt, du2dt])
+
+def hopf_bif_pc(x0, pars):
+    return hopf_bif(x0, 0, pars)[0]
