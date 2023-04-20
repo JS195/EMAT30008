@@ -1,44 +1,36 @@
 import numpy as np
-from scipy.optimize import fsolve
-import matplotlib.pyplot as plt
-from NumericalShooting import find_shoot_orbit
-from scipy.optimize import root
-from Functions_and_ODEs import hopf_bif, hopf_bif_pc, cubic
+from Week_19 import finite_grid, matrix_build, boundary_conditions
 
-def natural_continuation(f, #Funciton or ODE system
-                         u0, #initial guess
-                         min_par, #minimum par value
-                         max_par, # maximum par value
-                         no_steps, #number of steps 
-                         phase_cond = 'None', #phase conditiion
-                         discretisation = 'shooting'
-                         ):
-    sol_list = []
-    par_list = np.linspace(min_par, max_par, no_steps)
-    if phase_cond != 'None':
-        if discretisation == 'shooting':
-            for par in par_list:
-                sol = find_shoot_orbit(f, phase_cond, u0, par) # no need to update parameters, good guess already
-                sol_list.append(sol)
-        return np.array(sol_list), par_list
-    for par in par_list:
-        sol = root(lambda x: f(x, par), u0)
-        sol_list.append(sol.x)
-        u0 = sol.x
-    return np.array(sol_list), par_list
+def time_grid(N, a, b, D, C=0.49):
+    grid = finite_grid(N, a, b)
+    dx = grid[1]
+    x_int = grid[2]
+    dt = C*dx**2/D
+    t_final = 1
+    N_time = int(np.ceil(t_final/dt))
+    t = dt*np.arange(N_time)
+    return dt, dx, t, N_time, x_int
 
+def explicit_euler(N, D, gamma1, gamma2, a, b, C, IC, true_sol='None'):
+    dt, dx, t, N_time, x_int = time_grid(N, a, b , D, C)
+    A_matrix = matrix_build(N,D)
+    b_matrix = A_matrix @ boundary_conditions(N,gamma1,gamma2)
+    U = np.zeros((N_time + 1, N-1))
+    U[0,:] = IC(x_int, a, b)
+    for i in range(0,N_time-1):
+        U[i+1,:] = U[i,:] + (dt*D/dx**2)*(A_matrix@U[i,:]+b_matrix) 
+    if true_sol != 'None':
+        u_true = np.zeros((N_time+1, N-1))
+        for n in range(0, N_time):
+            u_true[n,:] = true_sol(t, n, x_int, a, b, D)
+        return U, u_true
+    else:
+        return U
 
+def initial_condition1(x_values, a, b):
+    return np.sin(np.pi*(x_values-a)/(b-a))
 
+def true_solution(t, n, x_int, a, b, D):
+    return np.exp(-(b-a)**2*D*np.pi**2*t[n]) * np.sin(np.pi*(x_int-a)/(b-a))
 
-results, pars = natural_continuation(hopf_bif, [1.2, 1.0, 4], 0, 2, 30, hopf_bif_pc)
-norm_np_sol_list = np.linalg.norm(results[:, :-1], axis = 1)
-plt.plot(pars, norm_np_sol_list)
-plt.xlabel('beta value')
-plt.ylabel('||x||')
-plt.show()
-
-results, pars = natural_continuation(cubic, 0, -2, 2, 30)
-plt.plot(pars,results)
-plt.xlabel('c')
-plt.ylabel('x')
-plt.show()
+Explicit_ans, true_ans = explicit_euler(N=20, D=1, gamma1=0.0, gamma2=0.0, a=0, b=1, C=0.49, IC=initial_condition1, true_sol=true_solution)
