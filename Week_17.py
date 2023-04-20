@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.optimize import fsolve
 import matplotlib.pyplot as plt
-from Archive.Week_16 import shooting
+from NumericalShooting import shooting
 
 def cubic(x, pars):
     return x ** 3 - x + pars
