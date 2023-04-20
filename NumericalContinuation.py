@@ -5,14 +5,20 @@ from NumericalShooting import find_shoot_orbit
 from scipy.optimize import root
 from Functions_and_ODEs import hopf_bif, hopf_bif_pc, cubic
 
-def natural_continuation(f, #Funciton or ODE system
-                         u0, #initial guess
-                         min_par, #minimum par value
-                         max_par, # maximum par value
-                         no_steps, #number of steps 
-                         phase_cond = 'None', #phase conditiion
-                         discretisation = 'shooting'
-                         ):
+def natural_continuation(f, u0, min_par, max_par, no_steps, phase_cond = 'None', discretisation = 'shooting'):
+    """
+    Computes and plots the natural continuation of a system of ODEs as a function of a parameter.
+
+    :param f: The system of ODEs, given as a function of the form f(u, par), where u is the state vector and par is the parameter vector.
+    :param u0: The initial guess for the solution of the ODE system.
+    :param min_par: The minimum value of the parameter for which the continuation is computed.
+    :param max_par: The maximum value of the parameter for which the continuation is computed.
+    :param no_steps: The number of steps to take in the parameter space.
+    :param phase_cond: Optional. If provided, it specifies the phase condition for the shooting method used to compute the continuation.
+    :param discretisation: Optional. Specifies the discretization method to use. Can be 'shooting' (default) or 'fsolve'.
+    
+    :returns: A tuple containing two arrays: the first contains the solutions of the ODE system for each parameter value, and the second contains the corresponding parameter values.
+    """
     sol_list = []
     par_list = np.linspace(min_par, max_par, no_steps)
     if phase_cond != 'None':
@@ -45,3 +51,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
