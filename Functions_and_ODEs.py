@@ -91,3 +91,14 @@ def hopf_pc(x0, pars):
     :returns: The phase condition of the predator-prey system.
     """
     return hopf(x0, 0, pars)[0]
+
+def three_dim_hopf(U, t, pars):
+    u1, u2, u3 = U[0], U[1], U[2]
+    beta, sigma = pars[0], pars[1]
+    du1dt = beta * u1 -u2 + sigma*u1*(u1**2 + u2**2)
+    du2dt = u1 + beta*u2 + sigma*u2*(u1**2 + u2**2)
+    du3dt = -u3
+    return np.array([du1dt, du2dt, du3dt])
+
+def three_dim_hopf_pc(x0, pars):
+    return three_dim_hopf(x0, 0, pars)[0]

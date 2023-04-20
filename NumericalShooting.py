@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import math
 from scipy.optimize import fsolve
 from scipy.signal import find_peaks
-from Functions_and_ODEs import predator_prey, pred_prey_pc, hopf, hopf_pc
+from Functions_and_ODEs import predator_prey, pred_prey_pc, hopf, hopf_pc, three_dim_hopf, three_dim_hopf_pc
 from ODEsolver import solve_odes, plot_different_parameters
 
 def plot_phase_portrait(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.01, solver='rk4', **kwargs):
@@ -119,8 +119,9 @@ def find_shoot_orbit(f, phase_cond, u0T, pars):
 def main():
     params = [[1.0, 0.1, 0.1], [1.0, 0.25, 0.1], [1.0, 0.4, 0.1]]
     plot_different_parameters(predator_prey, x0=[1,1], t0=0, t1=200, dt_max=0.01, params=params)
-
+    
     #Plotting phase portrait
+    pars = [1.0, 0.2, 0.1]
     plot_phase_portrait(pars=pars)
 
     # Isolate periodic orbit
@@ -128,7 +129,7 @@ def main():
     print('The true values of the predator prey orbit:', orbit)
 
     #Predator Prey shooting/ root finding
-    pars = [1.0, 0.2, 0.1]
+    # Using the true values from before to provide an initial guess
     u0T = [0.6, 0.3, 20]
     shooting_orbit = find_shoot_orbit(predator_prey, pred_prey_pc, u0T, pars)
     print('The shooting values of the predator prey orbit: ', shooting_orbit)
@@ -138,10 +139,21 @@ def main():
     orbit = iso_orbit(hopf, [1,1], 0, 200, 0.01, pars=pars)
     print('The true values of the hopf orbit:', orbit)
 
-    #Using the true values of the hopf orbit as an approximate guess for the shooting
+    # Using the true values from before to provide an initial guess
     u0T = [0.6, 0.001, 6]
     shooting_orbit = find_shoot_orbit(hopf, hopf_pc, u0T, pars)
     print('The shooting values of the hopf orbit: ', shooting_orbit)
+
+    #Testing the shooting code using the three dimensional hopf system
+    pars = [0.3, -1]
+    orbit = iso_orbit(three_dim_hopf, [1,1,1], 0, 200, 0.01, pars=pars)
+    print('The true values of the three dim hopf orbit:', orbit)
+
+    # Using the true values from before to provide an initial guess
+    u0T = [0.6, 0.001, 0.001, 6]
+    shooting_orbit = find_shoot_orbit(three_dim_hopf, three_dim_hopf_pc, u0T, pars)
+    print('The shooting values of the three dim hopf orbit: ', shooting_orbit)
+
 
 if __name__ == "__main__":
     main()
