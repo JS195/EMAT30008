@@ -6,6 +6,12 @@ from BVPsolver import matrix_build, boundary_conditions, finite_grid
 from ODEsolver import RK4_step
 from ExampleFunctions import linear_diffusion_IC1, linear_diffusion_IC2
 
+def true_sol_func(N, D, a, b, t, N_time, x_int):
+    u_true = np.zeros((N_time+1, N-1))
+    for n in range(0, N_time):
+        u_true[n,:] = np.exp(-(b-a)**2*D*np.pi**2*t[n]) * np.sin(np.pi*(x_int-a)/(b-a))
+    return u_true
+
 def explicit_euler(N, D, gamma1, gamma2, a, b, dt, dx, t, N_time, x_int):
     A_matrix = matrix_build(N,D)
     b_matrix = A_matrix @ boundary_conditions(N,gamma1,gamma2)
@@ -16,11 +22,7 @@ def explicit_euler(N, D, gamma1, gamma2, a, b, dt, dx, t, N_time, x_int):
     for i in range(0,N_time-1):
         U[i+1,:] = U[i,:] + (dt*D/dx**2)*(A_matrix@U[i,:]+b_matrix) 
 
-    u_true = np.zeros((N_time+1, N-1))
-    for n in range(0, N_time):
-        u_true[n,:] = np.exp(-(b-a)**2*D*np.pi**2*t[n]) * np.sin(np.pi*(x_int-a)/(b-a))
-    
-    return U, u_true
+    return U
 
 def heat_equation_RK4(N, D, gamma1, gamma2, a, b, dt, dx, t, x_int):
     A_matrix = matrix_build(N,D)
@@ -34,12 +36,8 @@ def heat_equation_RK4(N, D, gamma1, gamma2, a, b, dt, dx, t, x_int):
     
     for i in range(len(t)-1):
         U[i+1,:], _ = RK4_step(f, U[i,:], t[i], dt)
-
-    u_true = np.zeros((len(t), N-1))
-    for n in range(len(t)):
-        u_true[n,:] = np.exp(-(b-a)**2*D*np.pi**2*t[n]) * np.sin(np.pi*(x_int-a)/(b-a))
     
-    return U, u_true
+    return U
 
 def animate_solution(U, u_true, x_int, N_time):
     fig, ax = plt.subplots()
@@ -105,7 +103,9 @@ def main():
     D = 1
 
     dt, dx, t, N_time, x_int = time_grid(N, a, b, D)
-    U_explicit, u_true = explicit_euler(N, D, gamma1, gamma2, a, b, dt, dx, t, N_time, x_int)
+    U_explicit = explicit_euler(N, D, gamma1, gamma2, a, b, dt, dx, t, N_time, x_int)
+    U_RK4 = heat_equation_RK4(N, D, gamma1, gamma2, a, b, dt, dx, t, x_int)
+    u_true = true_sol_func(N, D, a, b, t, N_time, x_int)
     animate_solution(U_explicit, u_true, x_int, N_time)
 
     #Part 2
