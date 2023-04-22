@@ -1,7 +1,7 @@
 import numpy as np 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from Week_19 import matrix_build, boundary_conditions, finite_grid
+from BVPsolver import matrix_build, boundary_conditions, finite_grid
 from Archive.OldODEsolver import RK4_step
 
 def explicit_euler(N, D, gamma1, gamma2, a, b, dt, dx, t, N_time, x_int):

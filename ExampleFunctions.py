@@ -118,8 +118,11 @@ def cubic(x, pars):
     c = -1
     return a * x**3 + b * x**2 + c * x + pars
 
-def linear_diffusion_IC(x_values, a, b):
+def linear_diffusion_IC1(x_values, a, b):
     return np.sin(np.pi*(x_values-a)/(b-a))
+
+def linear_diffusion_IC2(x_values):
+    return np.sin(np.pi*(x_values))
 
 def linear_diffusion_true_sol(t, n, x_int, a, b, D):
     return np.exp(-(b-a)**2*D*np.pi**2*t[n]) * np.sin(np.pi*(x_int-a)/(b-a))

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.interpolate
-from Week_19 import matrix_build, boundary_conditions
+from BVPsolver import matrix_build, boundary_conditions
 from Archive.Week_20 import time_grid
 
 def implicit_euler(N, a, b, gamma1, gamma2, D):

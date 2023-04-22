@@ -3,7 +3,7 @@ from scipy.optimize import fsolve
 import matplotlib.pyplot as plt
 from NumericalShooting import find_shoot_orbit
 from scipy.optimize import root
-from Functions_and_ODEs import hopf_bif, hopf_bif_pc, cubic
+from ExampleFunctions import hopf_bif, hopf_bif_pc, cubic
 
 def natural_continuation(f, u0, min_par, max_par, no_steps, phase_cond = 'None', discretisation = 'shooting'):
     """

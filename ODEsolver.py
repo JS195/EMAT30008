@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import time
-from Functions_and_ODEs import euler_number, true_euler_number, predator_prey, func2
+from ExampleFunctions import euler_number, true_euler_number, predator_prey, func2
 
 def euler_step(f, x, t, dt, **kwargs):
     """
@@ -85,7 +85,7 @@ def error_difference(f, x0, t0, t1, true_solution, pars):
     """
     rk4error = []
     eulererror = []
-    timestep = np.logspace(-5, 2, 15)
+    timestep = np.logspace(-5, 3, 15)
     for dt in timestep:
         sol, t = solve_odes(f, x0, t0, t1, dt_max=dt, solver = 'rk4')
         error = abs(sol[-1] - true_solution(pars))
@@ -95,8 +95,10 @@ def error_difference(f, x0, t0, t1, true_solution, pars):
         error1 = abs(sol1[-1] - true_solution(pars))
         eulererror.append(error1)
 
-    plt.loglog(timestep, rk4error, 'x-')
-    plt.loglog(timestep, eulererror, 'x-')
+    plt.loglog(timestep, rk4error, 'bx-')
+    plt.loglog(timestep, eulererror, 'rx-')
+    plt.xlabel('Time step')
+    plt.ylabel('Error')
     plt.show()
 
 def plot_different_parameters(f, x0, t0, t1, dt_max, params, solver='rk4'):
@@ -134,6 +136,16 @@ def main():
     sol, t = solve_odes(func2, x0=[1,1], t0=0, t1=20, dt_max=0.01)
     plt.plot(sol)
     plt.show()
+
+    start_timeEuler = time.perf_counter()
+    ansEuler, tEuler = solve_odes(euler_number, x0=1, t0=0, t1=1, dt_max=0.01, solver = 'euler')
+    end_timeEuler = time.perf_counter()
+
+    start_timeRK4 = time.perf_counter()
+    ansRK4, tRK4 = solve_odes(euler_number, x0=1, t0=0, t1=1, dt_max=1, solver = 'rk4')
+    end_timeRK4 = time.perf_counter()
+
+    print(end_timeEuler, end_timeRK4)
 
 if __name__ == "__main__":
     main()
