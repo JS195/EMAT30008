@@ -133,19 +133,19 @@ def main():
     pars = 1
     error_difference(euler_number, x0=1, t0=0, t1=1, true_solution = true_euler_number, pars = 1)
 
-    sol, t = solve_odes(func2, x0=[1,1], t0=0, t1=20, dt_max=0.01)
-    plt.plot(sol)
-    plt.show()
-
-    start_timeEuler = time.perf_counter()
-    ansEuler, tEuler = solve_odes(euler_number, x0=1, t0=0, t1=1, dt_max=0.01, solver = 'euler')
+    time.perf_counter()
+    ansEuler, tEuler = solve_odes(euler_number, x0=1, t0=0, t1=20, dt_max=0.01, solver = 'euler')
     end_timeEuler = time.perf_counter()
 
-    start_timeRK4 = time.perf_counter()
-    ansRK4, tRK4 = solve_odes(euler_number, x0=1, t0=0, t1=1, dt_max=1, solver = 'rk4')
+    time.perf_counter()
+    ansRK4, tRK4 = solve_odes(euler_number, x0=1, t0=0, t1=20, dt_max=1, solver = 'rk4')
     end_timeRK4 = time.perf_counter()
 
     print(end_timeEuler, end_timeRK4)
+
+    sol, t = solve_odes(func2, x0=[0.5,0.5], t0=0, t1=100, dt_max=1)
+    plt.plot(sol)
+    plt.show()
 
 if __name__ == "__main__":
     main()
