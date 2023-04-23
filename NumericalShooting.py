@@ -63,17 +63,17 @@ def shooting(f, phase_cond):
     :param f: Function defining a system of ODEs.
     :param phase_cond: Function defining the boundary conditions to be satisfied.
     
-    :returns: A function G that takes as input a list u0T representing the initial guess 
-    for the solution, and a dictionary of parameter values, and returns the difference between 
-    the actual boundary condition and the initial guess boundary condition.
+    :returns: A function G that takes as input a list u0 representing the initial guess 
+    for the solution, the final time value T, and a dictionary of parameter values, and 
+    returns the difference between the actual boundary condition and the initial guess 
+    boundary condition.
     """
-    def G(u0T, pars):
+    def G(u0, T, pars):
         """
         Defines a function G that is used by the shooting method to solve a boundary value problem.
 
-        :param u0T: List representing the initial guess for the solution, where the last element 
-        is the guess for the final time value, and the remaining elements are the guess for the 
-        initial value(s).
+        :param u0: List representing the initial guess for the solution.
+        :param T: The final time value.
         :param pars: Dictionary of parameter values.
         
         :returns: A numpy array representing the difference between the actual boundary condition 
@@ -81,23 +81,10 @@ def shooting(f, phase_cond):
         difference between the actual and guessed initial value(s), while the last element corresponds 
         to the difference between the actual and guessed final time value.
         """
-        def F(u0, T):
-            """
-            Solves a boundary value problem with shooting method.
+        sol, t = solve_odes(f, x0=u0, t0=0, t1=T, dt_max=0.01, solver='rk4', pars=pars)
+        final_sol = sol[-1, :]
+        return np.append(u0 - final_sol, phase_cond(u0, pars=pars))
 
-            :param f: Function defining an ODE or ODE system.
-            :param phase_cond: Function defining the boundary conditions.
-            :param u0T: Array of initial guesses for the solution and the final time.
-            :param pars: Any additional input parameters.
-            
-            :returns: Array of residuals between the boundary conditions and the solution obtained by 
-            the shooting method.
-            """
-            sol, t = solve_odes(f, x0=u0, t0=0, t1=T, dt_max=0.01, solver='rk4', pars=pars)
-            final_sol = sol[-1, :]
-            return final_sol
-        T, u0 = u0T[-1], u0T[:-1]
-        return np.append(u0 - F(u0, T), phase_cond(u0, pars=pars))
     return G
 
 def find_shoot_orbit(f, phase_cond, u0T, pars):
@@ -111,7 +98,8 @@ def find_shoot_orbit(f, phase_cond, u0T, pars):
 
     :returns: The initial conditions and the time period or the orbit as an array.
     """
-    orbit = fsolve(shooting(f, phase_cond), u0T, pars)
+    G = shooting(f, phase_cond)
+    orbit = fsolve(lambda u0T: G(u0T[:-1], u0T[-1], pars), u0T)
     return orbit
 
 def main():
