@@ -23,28 +23,30 @@ def hopf_bif(X, t, pars):
 def hopf_bif_pc(x0, pars):
     return hopf_bif(x0, 0, pars)[0]
 
+def pseudo_arclength_continuation(f, u0, min_par, max_par, no_steps, step_size, phase_cond=None, discretisation='shooting'):
 
-def pseudo_arclength_continuation(f, u0, init_par, no_steps, step_size, t, phase_cond=None, discretisation='shooting'):
-    def extended_system(u_par, u_prev, par_prev, f, phase_cond, step_size, t):
-        u, par = u_par[:-1], u_par[-1]
-        pars = (par,)
-        F = np.append(f(u, t, *pars), np.linalg.norm(u_par - np.append(u_prev, par_prev)) - step_size)
-        return F
+    def arclength_residual(u_par, u0_par, f, step_size):
+        u = u_par[:-1]
+        par = u_par[-1]
+        res = np.hstack((f(u, 0, par), np.linalg.norm(u_par - u0_par) - step_size))
+        return res
 
-    sol_list = []
-    par_list = [init_par]
-    sol_list.append(u0)
-    u_prev, par_prev = np.array(u0), init_par
-    for _ in range(no_steps):
-        u_par_guess = np.append(u_prev, par_prev) + step_size * np.ones_like(np.append(u_prev, par_prev))
+    sol_list = [u0]
+    par_list = [min_par]
 
-        u_par_sol = fsolve(extended_system, u_par_guess, args=(u_prev, par_prev, f, phase_cond, step_size, t))
-        u_sol, par_sol = u_par_sol[:-1], u_par_sol[-1]
-        sol_list.append(u_sol)
-        par_list.append(par_sol)
-        u_prev, par_prev = u_sol, par_sol
+    for _ in range(10):
+        if par_list[-1] >= max_par:
+            break
+        if phase_cond is not None and discretisation == 'shooting':
+            raise NotImplementedError("Shooting method is not implemented for pseudo arclength continuation")
+        else:
+            u0_par = np.hstack((sol_list[-1], par_list[-1]))
+            u_par = fsolve(arclength_residual, u0_par, args=(u0_par, f, step_size))
+            sol_list.append(u_par[:-1])
+            par_list.append(u_par[-1])
 
     return np.array(sol_list), np.array(par_list)
+
 
 # Test the functions
 
