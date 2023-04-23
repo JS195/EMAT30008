@@ -39,23 +39,21 @@ def iso_orbit(f, x0, t0, t1, dt_max, **kwargs):
     :param dt_max: Maximum step size.
     :param **kwargs: Optional. Any additional input keyword arguments.
     
-    :returns: A list containing the initial conditons, and the time period of the limit cycle, if 
+    :returns: A list containing the initial conditions, and the time period of the limit cycle, if 
     one exists. If no limit cycle is found, returns None.
     """
     sol, t = solve_odes(f, x0, t0, t1, dt_max, 'rk4', **kwargs)
     x_coords = sol[:, 0]
     y_coords = sol[:, 1]
-    peak_indices = find_peaks(x_coords)[0]
-    previous_peak_index = None
-    previous_peak_value = None
-    for current_peak_index in peak_indices:
-        if previous_peak_value is not None:
-            if math.isclose(x_coords[current_peak_index], previous_peak_value, abs_tol=1e-4):
-                period = t[current_peak_index] - t[previous_peak_index]
-                orbit_info = [x_coords[current_peak_index], y_coords[current_peak_index], period]
-                return orbit_info
-        previous_peak_index = current_peak_index
-        previous_peak_value = x_coords[current_peak_index]
+
+    peak_indices = np.where((x_coords[1:-1] > x_coords[:-2]) & (x_coords[1:-1] > x_coords[2:]))[0] + 1
+
+    for i in range(1, len(peak_indices)):
+        if np.isclose(x_coords[peak_indices[i]], x_coords[peak_indices[i - 1]], atol=1e-4):
+            period = t[peak_indices[i]] - t[peak_indices[i - 1]]
+            orbit_info = [x_coords[peak_indices[i]], y_coords[peak_indices[i]], period]
+            return orbit_info
+
     return None
 
 def shooting(f, phase_cond):

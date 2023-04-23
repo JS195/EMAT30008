@@ -94,7 +94,7 @@ def finite_grid(N, a, b):
     x_int=x[1:-1]
     return x, dx, x_int
 
-def BVP_solver(N, a, b, gamma1, gamma2, D, integer=1, source=False, boundary="dirichlet", k_a=None, k_b=None, h_a=None, h_b=None):
+def BVP_solver(N, a, b, gamma1, gamma2, D, integer=1, source=None, boundary="dirichlet", k_a=None, k_b=None, h_a=None, h_b=None):
     grid = finite_grid(N, a, b)
     x = grid[0]
     dx = grid[1]
