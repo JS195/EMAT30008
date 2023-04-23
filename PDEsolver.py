@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import scipy.interpolate
-from BVPsolver import matrix_build, boundary_conditions, finite_grid
+from BVPsolver import matrix_build, dirichlet, finite_grid
 from ODEsolver import RK4_step
 from ExampleFunctions import linear_diffusion_IC1, linear_diffusion_IC2
 
@@ -14,7 +14,7 @@ def true_sol_func(N, D, a, b, t, N_time, x_int):
 
 def explicit_euler(N, D, gamma1, gamma2, a, b, dt, dx, t, N_time, x_int):
     A_matrix = matrix_build(N,D)
-    b_matrix = A_matrix @ boundary_conditions(N,gamma1,gamma2)
+    b_matrix = A_matrix @ dirichlet(N,gamma1,gamma2)
 
     U = np.zeros((N_time + 1, N-1))
     U[0,:] = linear_diffusion_IC1(x_int, a, b)
@@ -26,7 +26,7 @@ def explicit_euler(N, D, gamma1, gamma2, a, b, dt, dx, t, N_time, x_int):
 
 def heat_equation_RK4(N, D, gamma1, gamma2, a, b, dt, dx, t, x_int):
     A_matrix = matrix_build(N,D)
-    b_matrix = A_matrix @ boundary_conditions(N,gamma1,gamma2)
+    b_matrix = A_matrix @ dirichlet(N,gamma1,gamma2)
 
     U = np.zeros((len(t), N-1))
     U[0,:] = np.sin(np.pi*(x_int-a)/(b-a))
@@ -71,12 +71,12 @@ def time_grid(N, a, b, D, C=0.49):
 def implicit_euler(N, gamma1, gamma2, D, N_time, x_int, dt, dx, IC):
     C = D*dt/dx**2
     A_matrix = matrix_build(N, D)
-    b_matrix = A_matrix @ boundary_conditions(N, gamma1, gamma2)
+    b_matrix = A_matrix @ dirichlet(N, gamma1, gamma2)
     identity = np.identity(N-1)
     U = np.zeros((N_time + 1, N-1))
     U[0,:] = IC(x_int)
 
-    for i in range(0, N_time-1):
+    for i in range(0, N_time):
         U[i+1,:] = np.linalg.solve(identity - C*A_matrix, U[i,:] + C*b_matrix)
     
     return U
@@ -84,12 +84,12 @@ def implicit_euler(N, gamma1, gamma2, D, N_time, x_int, dt, dx, IC):
 def crank(N, gamma1, gamma2, D, N_time, x_int, dt, dx, IC):
     C = D*dt/dx**2
     A_matrix = matrix_build(N, D)
-    b_matrix = A_matrix @ boundary_conditions(N, gamma1, gamma2)
+    b_matrix = A_matrix @ dirichlet(N, gamma1, gamma2)
     identity = np.identity(N-1)
     U = np.zeros((N_time + 1, N-1))
     U[0,:] = IC(x_int)
 
-    for i in range(0, N_time-1):
+    for i in range(0, N_time):
         U[i+1,:] = np.linalg.solve(identity - C/2 * A_matrix, (identity + C/2 * A_matrix) @ U[i,:] + C * b_matrix)
     
     return U
