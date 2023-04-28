@@ -126,3 +126,17 @@ def linear_diffusion_IC2(x_values):
 
 def linear_diffusion_true_sol(t, n, x_int, a, b, D):
     return np.exp(-(b-a)**2*D*np.pi**2*t[n]) * np.sin(np.pi*(x_int-a)/(b-a))
+
+def true_sol(x,a,b,alpha,beta, D):
+    answer = ((beta - alpha)/(b - a))*(x - a) + alpha
+    return np.array(answer)
+
+def true_ans_part2(x,a,b,alpha,beta, D, integer):
+    answer = (-integer)/(2*D)*((x-a)*(x-b)) + ((beta-alpha)/(b-a))*(x-a)+alpha
+    return np.array(answer)
+
+def true_sol_func(N, D, a, b, t, N_time, x_int):
+    u_true = np.zeros((N_time+1, N-1))
+    for n in range(0, N_time):
+        u_true[n,:] = np.exp(-(b-a)**2*D*np.pi**2*t[n]) * np.sin(np.pi*(x_int-a)/(b-a))
+    return u_true

@@ -58,28 +58,20 @@ def iso_orbit(f, x0, t0, t1, dt_max, **kwargs):
 
 def shooting(f, phase_cond):
     """
-    Solves a boundary value problem using the shooting method.
+    Returns a function G for solving a boundary value problem using the shooting method.
 
-    :param f: Function defining a system of ODEs.
-    :param phase_cond: Function defining the boundary conditions to be satisfied.
-    
-    :returns: A function G that takes as input a list u0 representing the initial guess 
-    for the solution, the final time value T, and a dictionary of parameter values, and 
-    returns the difference between the actual boundary condition and the initial guess 
-    boundary condition.
+    :param f: System of ODEs function.
+    :param phase_cond: Boundary conditions function.
+    :returns: Function G calculating differences between actual and guessed boundary conditions.
     """
     def G(u0, T, pars):
         """
-        Defines a function G that is used by the shooting method to solve a boundary value problem.
+        Calculates differences between actual and guessed boundary conditions for a given problem.
 
-        :param u0: List representing the initial guess for the solution.
-        :param T: The final time value.
+        :param u0: Initial guess for the solution.
+        :param T: Final time value.
         :param pars: Dictionary of parameter values.
-        
-        :returns: A numpy array representing the difference between the actual boundary condition 
-        and the initial guess boundary condition. The first elements of the array correspond to the 
-        difference between the actual and guessed initial value(s), while the last element corresponds 
-        to the difference between the actual and guessed final time value.
+        :returns: Numpy array of differences between actual and guessed boundary conditions.
         """
         sol, t = solve_odes(f, x0=u0, t0=0, t1=T, dt_max=0.01, solver='rk4', pars=pars)
         final_sol = sol[-1, :]

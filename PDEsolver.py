@@ -4,15 +4,26 @@ import matplotlib.animation as animation
 import scipy.interpolate
 from BVPsolver import matrix_build, dirichlet, finite_grid
 from ODEsolver import RK4_step
-from ExampleFunctions import linear_diffusion_IC1, linear_diffusion_IC2
-
-def true_sol_func(N, D, a, b, t, N_time, x_int):
-    u_true = np.zeros((N_time+1, N-1))
-    for n in range(0, N_time):
-        u_true[n,:] = np.exp(-(b-a)**2*D*np.pi**2*t[n]) * np.sin(np.pi*(x_int-a)/(b-a))
-    return u_true
+from ExampleFunctions import linear_diffusion_IC1, linear_diffusion_IC2, true_sol_func
 
 def explicit_euler(N, D, gamma1, gamma2, a, b, dt, dx, t, N_time, x_int):
+    """
+    Computes and plots the natural continuation of a system of ODEs as a function of a parameter.
+
+    :param N: The number of spatial grid points.
+    :param D: The diffusion coefficient.
+    :param gamma1: The boundary condition value at x = 0.
+    :param gamma2: The boundary condition value at x = 1.
+    :param a: The left-end initial condition parameter.
+    :param b: The right-end initial condition parameter.
+    :param dt: The time step size.
+    :param dx: The spatial step size.
+    :param t: The initial time.
+    :param N_time: The number of time steps.
+    :param x_int: The spatial domain interval.
+
+    :returns: A numpy array of shape (N_time+1, N-1) containing the solution at each time step for the explicit Euler method.
+    """    
     A_matrix = matrix_build(N,D)
     b_matrix = A_matrix @ dirichlet(N,gamma1,gamma2)
 
@@ -25,6 +36,22 @@ def explicit_euler(N, D, gamma1, gamma2, a, b, dt, dx, t, N_time, x_int):
     return U
 
 def heat_equation_RK4(N, D, gamma1, gamma2, a, b, dt, dx, t, x_int):
+    """
+    Solves the heat equation numerically using the fourth-order Runge-Kutta method.
+
+    :param N: The number of spatial grid points.
+    :param D: The diffusion coefficient.
+    :param gamma1: The boundary condition value at x = 0.
+    :param gamma2: The boundary condition value at x = 1.
+    :param a: The left-end initial condition parameter.
+    :param b: The right-end initial condition parameter.
+    :param dt: The time step size.
+    :param dx: The spatial step size.
+    :param t: A numpy array containing the time values at which to compute the solution.
+    :param x_int: A tuple containing the spatial domain interval (x_min, x_max).
+
+    :returns: A numpy array of shape (len(t), N-1) containing the numerical solution of the heat equation at the time values given in the input t.
+    """
     A_matrix = matrix_build(N,D)
     b_matrix = A_matrix @ dirichlet(N,gamma1,gamma2)
 
@@ -40,6 +67,16 @@ def heat_equation_RK4(N, D, gamma1, gamma2, a, b, dt, dx, t, x_int):
     return U
 
 def animate_solution(U, u_true, x_int, N_time):
+    """
+    Animates the numerical solution of the heat equation along with the true solution.
+
+    :param U: A numpy array of shape (N_time+1, N-1) containing the numerical solution of the heat equation.
+    :param u_true: A numpy array of shape (N_time+1, N-1) containing the true solution of the heat equation.
+    :param x_int: A tuple containing the spatial domain interval (x_min, x_max).
+    :param N_time: The number of time steps.
+
+    :returns: None, but animates a graph.
+    """
     fig, ax = plt.subplots()
     ax.set_ylim(0,1)
     ax.set_xlabel(f'$x$')
@@ -58,6 +95,17 @@ def animate_solution(U, u_true, x_int, N_time):
     plt.show()
 
 def time_grid(N, a, b, D, C=0.49):
+    """
+    Generates the time grid for solving the heat equation numerically using a finite difference method.
+
+    :param N: The number of spatial grid points.
+    :param a: The left-end point of the spatial domain.
+    :param b: The right-end point of the spatial domain.
+    :param D: The diffusion coefficient.
+    :param C: The Courant number, with a default value of 0.49.
+
+    :returns: A tuple containing the time step size dt, the spatial step size dx, a numpy array t containing the time values at which to compute the solution, the number of time steps N_time, and a tuple containing the spatial domain interval (x_min, x_max).
+    """
     # C must be smaller than 0.5, else the system bugs out
     grid = finite_grid(N, a, b)
     dx = grid[1]
@@ -69,6 +117,21 @@ def time_grid(N, a, b, D, C=0.49):
     return dt, dx, t, N_time, x_int
 
 def implicit_euler(N, gamma1, gamma2, D, N_time, x_int, dt, dx, IC):
+    """
+Solves the heat equation numerically using the implicit Euler method.
+
+    :param N: The number of spatial grid points.
+    :param gamma1: The boundary condition value at x = 0.
+    :param gamma2: The boundary condition value at x = 1.
+    :param D: The diffusion coefficient.
+    :param N_time: The number of time steps.
+    :param x_int: A tuple containing the spatial domain interval.
+    :param dt: The time step size.
+    :param dx: The spatial step size.
+    :param IC: A function representing the initial condition.
+
+    :returns: A numpy array of shape (N_time+1, N-1) containing the numerical solution of the heat equation.
+    """
     C = D*dt/dx**2
     A_matrix = matrix_build(N, D)
     b_matrix = A_matrix @ dirichlet(N, gamma1, gamma2)
@@ -82,6 +145,21 @@ def implicit_euler(N, gamma1, gamma2, D, N_time, x_int, dt, dx, IC):
     return U
 
 def crank(N, gamma1, gamma2, D, N_time, x_int, dt, dx, IC):
+    """
+    Solves the heat equation numerically using the Crank-Nicolson method.
+
+    :param N: The number of spatial grid points.
+    :param gamma1: The boundary condition value at x = 0.
+    :param gamma2: The boundary condition value at x = 1.
+    :param D: The diffusion coefficient.
+    :param N_time: The number of time steps.
+    :param x_int: A tuple containing the spatial domain interval.
+    :param dt: The time step size.
+    :param dx: The spatial step size.
+    :param IC: A function representing the initial condition.
+
+    :returns: A numpy array of shape (N_time+1, N-1) containing the numerical solution of the heat equation.
+    """
     C = D*dt/dx**2
     A_matrix = matrix_build(N, D)
     b_matrix = A_matrix @ dirichlet(N, gamma1, gamma2)
