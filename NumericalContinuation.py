@@ -36,8 +36,8 @@ def natural_continuation(f, u0, min_par, max_par, no_steps, phase_cond = 'None',
 def main():
     results, pars = natural_continuation(hopf_bif, [1.2, 1.0, 4], -1, 4, 30, hopf_bif_pc)
     norm_np_sol_list = np.linalg.norm(results[:, :-1], axis = 1)
-    #plt.plot(pars, results[:,0], 'bx-')
-    #plt.plot(pars,results[:,1],'rx-')
+    plt.plot(pars, results[:,0], 'bx-')
+    plt.plot(pars,results[:,1],'rx-')
     plt.plot(pars, norm_np_sol_list, 'rx')
     plt.xlabel('beta value')
     plt.ylabel('||x||')

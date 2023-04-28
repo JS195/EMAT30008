@@ -24,7 +24,8 @@ def neumann(N, alpha, beta, dx):
     A[-1, -1] = 1
     return A * alpha / dx
 
-def robin(N, gamma1, gamma2, k_a, k_b, h_a, h_b, dx):
+def robin(N, gamma1, gamma2, dx, RobinArgs):
+    k_a, k_b, h_a, h_b = RobinArgs
     A = np.zeros((N-1, N-1))
     A[0, 0] = k_a + h_a * dx
     A[0, 1] = -k_a
@@ -61,8 +62,8 @@ def Matrix_solver(N, A_matrix, dx, x_int, b_matrix, x_dependant=False, integer=1
     if source:
         b_matrix -= ((dx)**2) * source_function(N, integer, x_int, 0, x_dependant, u_dependent=False)
 
-    x_ans = np.linalg.solve(A_matrix, b_matrix)
-    return x_ans, x_int
+    u = np.linalg.solve(A_matrix, b_matrix)
+    return u, x_int
 
 def Iterative_solver(N, A_matrix, dx, x_int, b_matrix, integer, source, x_dependant, u_dependant, tol, max_iter):
     u = np.zeros(N-1)
@@ -84,9 +85,7 @@ def Iterative_solver(N, A_matrix, dx, x_int, b_matrix, integer, source, x_depend
     return(u, x_int)
 
 
-
-
-def BVP_solver(N, a, b, gamma1, gamma2, D, integer=1, source=None, boundary="dirichlet", k_a=None, k_b=None, h_a=None, h_b=None, x_dependant=False, u_dependant=False, tol=1e-6, max_iter=100):
+def BVP_solver(N, a, b, gamma1, gamma2, D, integer=1, source=None, boundary="dirichlet", RobinArgs=None, x_dependant=False, u_dependant=False, tol=1e-6, max_iter=100):
     grid = finite_grid(N, a, b)
     x = grid[0]
     dx = grid[1]
@@ -99,10 +98,10 @@ def BVP_solver(N, a, b, gamma1, gamma2, D, integer=1, source=None, boundary="dir
         b_matrix = np.zeros(N-1)
         A_matrix += neumann(N, gamma1, gamma2, dx)
     elif boundary == "robin":
-        if k_a is None or k_b is None or h_a is None or h_b is None:
+        if RobinArgs is None:
             raise ValueError("k_a, k_b, h_a, and h_b must be provided for Robin boundary conditions.")
         b_matrix = np.zeros(N-1)
-        A_matrix += robin(N, gamma1, gamma2, k_a, k_b, h_a, h_b, dx)
+        A_matrix += robin(N, gamma1, gamma2, dx, RobinArgs)
 
     if u_dependant == False:
         x_ans, x_int = Matrix_solver(N, A_matrix, dx, x_int, b_matrix, x_dependant, integer, source)
@@ -132,7 +131,7 @@ plt.legend()
 plt.show()
 
 
-x_ansbratu, x_intbratu = BVP_solver(N=50, a=0, b=1, gamma1=0, gamma2=0, D=1, integer=0.1, source=True, boundary="dirichlet", x_dependant=False, u_dependant=True, tol=1e-6, max_iter=100)
+x_ansbratu, x_intbratu = BVP_solver(N=50, a=0, b=1, gamma1=0, gamma2=0, D=3, integer=0.1, source=True, boundary="dirichlet", x_dependant=True, u_dependant=True, tol=1e-6, max_iter=100)
 
 plt.plot(x_intbratu, x_ansbratu, 'o', label="Numerical")
 
