@@ -13,8 +13,11 @@ def matrix_build(N,D):
     :returns: Numpy ndarray of shape (N-1, N-1) representing the Laplacian operator on the grid, 
     multiplied by D.
     """
+    #Initialise empty matrix
     matrix = np.zeros(((N-1),(N-1)))
+    #Fill diagonal with -2
     np.fill_diagonal(matrix, -2)
+    #Set off diagonal equal to 1
     for i in range((N-1)):
         for j in range((N-1)):
             if i == j-1 or i==j+1:
@@ -139,10 +142,11 @@ def Matrix_solver(N, A_matrix, dx, x_int, b_matrix, x_dependant=False, integer=1
     :returns: A tuple (u, x_int) where u is an (N-1) column vector that represents the solution x of the linear system Ax=b
               and x_int is the integer value used to create the source function.
     """
-
+    # Set up b if there is a source term
     if source:
         b_matrix -= ((dx)**2) * source_function(N, integer, x_int, x_dependant)
-
+    
+    #Solve system
     u = np.linalg.solve(A_matrix, b_matrix)
     return u, x_int
 
@@ -167,14 +171,17 @@ def Iterative_solver(N, A_matrix, dx, x_int, b_matrix, integer, source, x_depend
 
     :returns: A tuple (u, x_int) where u is an (N-1) column vector that represents the solution x of the linear system Ax=b
               and x_int is the integer value used to create the source function.
-    """    
+    """
+    # Initlaise solution vector u
     u = np.zeros(N-1)
+    # Initialize u_prev as an array of infinities with length N-1
     u_prev = np.ones(N-1) * np.inf
-    iter_count = 0
+    iter_count = 0 # Set iteration count to 0
 
     while np.linalg.norm(u - u_prev) > tol and iter_count < max_iter:
-        u_prev = u.copy()
+        u_prev = u.copy() # Copy the values of u into u_prev
 
+        # Update matrix system for source function and solve
         if source:
             b_matrix_updated = b_matrix - ((dx)**2) * source_function(N, integer, x_int, u, x_dependant, u_dependant)
             u = np.linalg.solve(A_matrix, b_matrix_updated)
@@ -210,13 +217,15 @@ def BVP_solver(N, a, b, gamma1, gamma2, D, integer=1, source=None, boundary="dir
 
     :returns: A tuple (x_ans, x_int) where x_ans is an (N-1) column vector that represents the solution u of the BVP
               and x_int is the integer value used to create the source function.
-    """    
+    """ 
+    # Generate a finite difference grid 
     grid = finite_grid(N, a, b)
     x = grid[0]
     dx = grid[1]
     x_int = grid[2]
     A_matrix = matrix_build(N, D)
 
+    # Choose and construct the bc
     if boundary == "dirichlet":
         b_matrix = -dirichlet(N, gamma1, gamma2)
     elif boundary == "neumann":
@@ -228,6 +237,7 @@ def BVP_solver(N, a, b, gamma1, gamma2, D, integer=1, source=None, boundary="dir
         b_matrix = np.zeros(N-1)
         A_matrix += robin(N, gamma1, gamma2, dx, RobinArgs)
 
+    # Choose the appropriate solver
     if u_dependant == False:
         x_ans, x_int = Matrix_solver(N, A_matrix, dx, x_int, b_matrix, x_dependant, integer, source)
 
