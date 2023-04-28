@@ -23,13 +23,17 @@ def explicit_euler(N, D, gamma1, gamma2, a, b, dt, dx, t, N_time, x_int):
     :param x_int: The spatial domain interval.
 
     :returns: A numpy array of shape (N_time+1, N-1) containing the solution at each time step for the explicit Euler method.
-    """    
+    """
+    # Build the required matrices
     A_matrix = matrix_build(N,D)
     b_matrix = A_matrix @ dirichlet(N,gamma1,gamma2)
 
+    # Initialize the U array with zeros
     U = np.zeros((N_time + 1, N-1))
+    #Set the IC for U
     U[0,:] = linear_diffusion_IC1(x_int, a, b)
     
+    # Loop over each time step and compute solution
     for i in range(0,N_time-1):
         U[i+1,:] = U[i,:] + (dt*D/dx**2)*(A_matrix@U[i,:]+b_matrix) 
 
@@ -52,15 +56,18 @@ def heat_equation_RK4(N, D, gamma1, gamma2, a, b, dt, dx, t, x_int):
 
     :returns: A numpy array of shape (len(t), N-1) containing the numerical solution of the heat equation at the time values given in the input t.
     """
+    # Construct the required matrices
     A_matrix = matrix_build(N,D)
     b_matrix = A_matrix @ dirichlet(N,gamma1,gamma2)
 
+    # Initialize the solution array U with the initial condition
     U = np.zeros((len(t), N-1))
     U[0,:] = np.sin(np.pi*(x_int-a)/(b-a))
     
     def f(U, t):
         return D/dx**2 * (A_matrix @ U + b_matrix)
     
+    # Solve using rk4
     for i in range(len(t)-1):
         U[i+1,:], _ = RK4_step(f, U[i,:], t[i], dt)
     
@@ -132,13 +139,16 @@ Solves the heat equation numerically using the implicit Euler method.
 
     :returns: A numpy array of shape (N_time+1, N-1) containing the numerical solution of the heat equation.
     """
+    # Compute C and build the required matrices
     C = D*dt/dx**2
     A_matrix = matrix_build(N, D)
     b_matrix = A_matrix @ dirichlet(N, gamma1, gamma2)
     identity = np.identity(N-1)
+    # Initialize the solution array U with the IC
     U = np.zeros((N_time + 1, N-1))
     U[0,:] = IC(x_int)
 
+    # Iterate over time steps using the implicit Euler method
     for i in range(0, N_time):
         U[i+1,:] = np.linalg.solve(identity - C*A_matrix, U[i,:] + C*b_matrix)
     
@@ -160,13 +170,17 @@ def crank(N, gamma1, gamma2, D, N_time, x_int, dt, dx, IC):
 
     :returns: A numpy array of shape (N_time+1, N-1) containing the numerical solution of the heat equation.
     """
+    #Compute C and initialise the required matrices
     C = D*dt/dx**2
     A_matrix = matrix_build(N, D)
     b_matrix = A_matrix @ dirichlet(N, gamma1, gamma2)
     identity = np.identity(N-1)
+
+    # Initialize the solution array U with the IC
     U = np.zeros((N_time + 1, N-1))
     U[0,:] = IC(x_int)
 
+    # Iterate over time steps using the Crank-Nicolson method
     for i in range(0, N_time):
         U[i+1,:] = np.linalg.solve(identity - C/2 * A_matrix, (identity + C/2 * A_matrix) @ U[i,:] + C * b_matrix)
     
