@@ -42,18 +42,24 @@ def iso_orbit(f, x0, t0, t1, dt_max, **kwargs):
     :returns: A list containing the initial conditions, and the time period of the limit cycle, if 
     one exists. If no limit cycle is found, returns None.
     """
+    # Solve ODE using rk4 method and extract x and y coordinates
     sol, t = solve_odes(f, x0, t0, t1, dt_max, 'rk4', **kwargs)
     x_coords = sol[:, 0]
     y_coords = sol[:, 1]
 
+    # Find the indices of the peaks in the x coordinates 
     peak_indices = np.where((x_coords[1:-1] > x_coords[:-2]) & (x_coords[1:-1] > x_coords[2:]))[0] + 1
 
+    #Check for a limit cycle
     for i in range(1, len(peak_indices)):
         if np.isclose(x_coords[peak_indices[i]], x_coords[peak_indices[i - 1]], atol=1e-4):
+            #Calculate time period of limit cycle
             period = t[peak_indices[i]] - t[peak_indices[i - 1]]
+            # Store ICs and time period ina  list
             orbit_info = [x_coords[peak_indices[i]], y_coords[peak_indices[i]], period]
             return orbit_info
-
+    
+    #If no limit cycle is found
     return None
 
 def shooting(f, phase_cond):
@@ -73,8 +79,10 @@ def shooting(f, phase_cond):
         :param pars: Dictionary of parameter values.
         :returns: Numpy array of differences between actual and guessed boundary conditions.
         """
+        # Solve ODE system using rk4 method
         sol, t = solve_odes(f, x0=u0, t0=0, t1=T, dt_max=0.01, solver='rk4', pars=pars)
         final_sol = sol[-1, :]
+        # Calculate differences between actual and estimates
         return np.append(u0 - final_sol, phase_cond(u0, pars=pars))
 
     return G
@@ -90,7 +98,9 @@ def find_shoot_orbit(f, phase_cond, u0T, pars):
 
     :returns: The initial conditions and the time period or the orbit as an array.
     """
+    # Get G function for solving BVP using shooting
     G = shooting(f, phase_cond)
+    #Use fsolve to find the root of G
     orbit = fsolve(lambda u0T: G(u0T[:-1], u0T[-1], pars), u0T)
     return orbit
 

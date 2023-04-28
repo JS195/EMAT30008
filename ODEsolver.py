@@ -54,17 +54,22 @@ def solve_odes(f, x0, t0, t1, dt_max, solver='rk4', **kwargs):
 
     :returns: An array of x values at each time value 
     """
+    # Initialise variables
     t = t0
     x = np.array(x0)
+    # Calculate the number of timesteps
     n = math.ceil((t1 - t0) / dt_max)
     sol = np.zeros((n+1, len(x0) if isinstance(x0, (list, tuple, np.ndarray)) else 1))
     sol[0] = x
     for i in range(n):
+        #Calculate current step size
         dt = min(dt_max, t1 - t)
+        #Select which method to use
         if solver == 'euler':
             x, t = euler_step(f, x, t, dt, **kwargs)
         elif solver == 'rk4':
             x, t = RK4_step(f, x, t, dt, **kwargs)
+        #Store solution at current timestep
         sol[i+1] = x
     return np.array(sol), np.linspace(t0, t1, n+1)
 
@@ -85,9 +90,12 @@ def error_difference(f, x0, t0, t1, true_solution, pars):
     """
     rk4error = []
     eulererror = []
+    # Array of timesteps to try
     timestep = np.logspace(-5, 3, 15)
     for dt in timestep:
+        #Solve ODE at current timestep
         sol, t = solve_odes(f, x0, t0, t1, dt_max=dt, solver = 'rk4')
+        #Calculate absolute error
         error = abs(sol[-1] - true_solution(pars))
         rk4error.append(error)
 
@@ -95,6 +103,7 @@ def error_difference(f, x0, t0, t1, true_solution, pars):
         error1 = abs(sol1[-1] - true_solution(pars))
         eulererror.append(error1)
 
+    #Plot the output graph
     plt.loglog(timestep, rk4error, 'bx-')
     plt.loglog(timestep, eulererror, 'rx-')
     plt.xlabel('Time step')

@@ -20,17 +20,21 @@ def natural_continuation(f, u0, min_par, max_par, no_steps, phase_cond = 'None',
     :returns: A tuple containing two arrays: the first contains the solutions of the ODE system for each parameter value, and the second contains the corresponding parameter values.
     """
     sol_list = []
+    #Generate list of parameter values
     par_list = np.linspace(min_par, max_par, no_steps)
     if phase_cond != 'None':
         if discretisation == 'shooting':
             for par in par_list:
-                sol = find_shoot_orbit(f, phase_cond, u0, par) # no need to update parameters, good guess already
+                # find the periodic orbit for each parameter value
+                sol = find_shoot_orbit(f, phase_cond, u0, par) 
                 sol_list.append(sol)
         return np.array(sol_list), par_list
-    for par in par_list:
-        sol = fsolve(f, u0, args=(par,))
-        sol_list.append(sol)
-        u0 = sol # Ensures convergence
+    else: # No phase condition specified
+        for par in par_list:
+            # solve for the equilibrium solution for each parameter value
+            sol = fsolve(f, u0, args=(par,))
+            sol_list.append(sol)
+            u0 = sol # Ensures convergence
     return np.array(sol_list), par_list
 
 def main():
