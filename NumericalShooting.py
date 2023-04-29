@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import math
+import warnings
 from scipy.optimize import fsolve
-from scipy.signal import find_peaks
 from ExampleFunctions import predator_prey, pred_prey_pc, hopf, hopf_pc, three_dim_hopf, three_dim_hopf_pc
 from ODEsolver import solve_odes, plot_different_parameters
 
@@ -27,7 +26,7 @@ def plot_phase_portrait(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.0
     plt.title('Predator-Prey Phase Portrait')
     plt.show()
 
-def iso_orbit(f, x0, t0, t1, dt_max, **kwargs):
+def iso_orbit(f, x0, t0, t1, dt_max, atol=1e-4, **kwargs):
     """
     Finds the limit cycle initial conditions and time period for a system of ODEs using the Runge-Kutta 
     4th order solver.
@@ -42,6 +41,14 @@ def iso_orbit(f, x0, t0, t1, dt_max, **kwargs):
     :returns: A list containing the initial conditions, and the time period of the limit cycle, if 
     one exists. If no limit cycle is found, returns None.
     """
+    # Some ValueErrors
+    if dt_max <= 0:
+        raise ValueError("dt_max must be greater than 0")
+    if t1 <= t0:
+        raise ValueError("t1 must be greater than t0")
+    if not isinstance(x0, (list, tuple, np.ndarray)) or len(x0) < 2:
+        raise ValueError("x0 must be a list, tuple, or numpy array with at least two elements")
+
     # Solve ODE using rk4 method and extract x and y coordinates
     sol, t = solve_odes(f, x0, t0, t1, dt_max, 'rk4', **kwargs)
     x_coords = sol[:, 0]
@@ -52,14 +59,15 @@ def iso_orbit(f, x0, t0, t1, dt_max, **kwargs):
 
     #Check for a limit cycle
     for i in range(1, len(peak_indices)):
-        if np.isclose(x_coords[peak_indices[i]], x_coords[peak_indices[i - 1]], atol=1e-4):
+        if np.isclose(x_coords[peak_indices[i]], x_coords[peak_indices[i - 1]], atol):
             #Calculate time period of limit cycle
             period = t[peak_indices[i]] - t[peak_indices[i - 1]]
             # Store ICs and time period ina  list
             orbit_info = [x_coords[peak_indices[i]], y_coords[peak_indices[i]], period]
             return orbit_info
     
-    #If no limit cycle is found
+    # If no limit cycle is found, raise a warning and return None
+    warnings.warn("No limit cycle found within the given absolute tolerance", UserWarning)
     return None
 
 def shooting(f, phase_cond):
@@ -70,6 +78,11 @@ def shooting(f, phase_cond):
     :param phase_cond: Boundary conditions function.
     :returns: Function G calculating differences between actual and guessed boundary conditions.
     """
+    if not callable(f):
+        raise ValueError("f must be a callable function")
+    if not callable(phase_cond):
+        raise ValueError("phase_cond must be a callable function")
+    
     def G(u0, T, pars):
         """
         Calculates differences between actual and guessed boundary conditions for a given problem.
@@ -79,6 +92,8 @@ def shooting(f, phase_cond):
         :param pars: Dictionary of parameter values.
         :returns: Numpy array of differences between actual and guessed boundary conditions.
         """
+        # Ignore runTime warnings
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
         # Solve ODE system using rk4 method
         sol, t = solve_odes(f, x0=u0, t0=0, t1=T, dt_max=0.01, solver='rk4', pars=pars)
         final_sol = sol[-1, :]

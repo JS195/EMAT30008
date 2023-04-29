@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import time
+import warnings
 from ExampleFunctions import euler_number, true_euler_number, predator_prey, func2
 
 def euler_step(f, x, t, dt, **kwargs):
@@ -54,6 +55,14 @@ def solve_odes(f, x0, t0, t1, dt_max, solver='rk4', **kwargs):
 
     :returns: An array of x values at each time value 
     """
+    # If incorrect inputs are specified
+    if dt_max <= 0:
+        raise ValueError("dt_max must be greater than 0")
+    if t1 <= t0:
+        raise ValueError("t1 must be greater than t0")
+    if solver not in ['euler', 'rk4']:
+        raise ValueError("Invalid solver specified. Choose either 'euler' or 'rk4'")
+    
     # Initialise variables
     t = t0
     x = np.array(x0)
@@ -71,6 +80,8 @@ def solve_odes(f, x0, t0, t1, dt_max, solver='rk4', **kwargs):
             x, t = RK4_step(f, x, t, dt, **kwargs)
         #Store solution at current timestep
         sol[i+1] = x
+        # Ignore runtime warnings as this only happens if t1 is large.
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
     return np.array(sol), np.linspace(t0, t1, n+1)
 
 def error_difference(f, x0, t0, t1, true_solution, pars):
@@ -94,12 +105,12 @@ def error_difference(f, x0, t0, t1, true_solution, pars):
     timestep = np.logspace(-5, 3, 15)
     for dt in timestep:
         #Solve ODE at current timestep
-        sol, t = solve_odes(f, x0, t0, t1, dt_max=dt, solver = 'rk4')
+        sol = solve_odes(f, x0, t0, t1, dt_max=dt, solver = 'rk4')[0]
         #Calculate absolute error
         error = abs(sol[-1] - true_solution(pars))
         rk4error.append(error)
 
-        sol1, t2 = solve_odes(f, x0, t0, t1, dt_max=dt, solver = 'euler')
+        sol1 = solve_odes(f, x0, t0, t1, dt_max=dt, solver = 'euler')[0]
         error1 = abs(sol1[-1] - true_solution(pars))
         eulererror.append(error1)
 
@@ -142,18 +153,21 @@ def main():
     pars = 1
     error_difference(euler_number, x0=1, t0=0, t1=1, true_solution = true_euler_number, pars = 1)
 
-    time.perf_counter()
+    start_timeEuler = time.perf_counter()
     ansEuler, tEuler = solve_odes(euler_number, x0=1, t0=0, t1=20, dt_max=0.01, solver = 'euler')
     end_timeEuler = time.perf_counter()
 
-    time.perf_counter()
+    start_timeRK4 = time.perf_counter()
     ansRK4, tRK4 = solve_odes(euler_number, x0=1, t0=0, t1=20, dt_max=1, solver = 'rk4')
     end_timeRK4 = time.perf_counter()
 
-    print(end_timeEuler, end_timeRK4)
+    print('Time taken for the Euler method to converge:', abs(end_timeEuler-start_timeEuler)) 
+    print('Time taken for the RK4 method to converge:', abs(end_timeRK4-start_timeRK4))
 
     sol, t = solve_odes(func2, x0=[0.5,0.5], t0=0, t1=100, dt_max=1)
-    plt.plot(sol)
+    plt.plot(t, sol)
+    plt.xlabel('Time')
+    plt.ylabel('Solution value')
     plt.show()
 
 if __name__ == "__main__":

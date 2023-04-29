@@ -110,6 +110,14 @@ def three_dim_hopf(U, t, pars):
     return np.array([du1dt, du2dt, du3dt])
 
 def three_dim_hopf_pc(x0, pars):
+    """
+    Returns the predator-prey phase condition of dx/dt(0) = 0.
+
+    :param x0: The initial condition for the ODE system.
+    :param *pars: Additional arguments to pass to the predator-prey funtion.
+
+    :returns: The phase condition of the predator-prey system.
+    """
     return three_dim_hopf(x0, 0, pars)[0]
 
 def hopf_bif(X, t, pars):
@@ -125,6 +133,17 @@ def hopf_bif(X, t, pars):
     du1dt = (pars * u1) - u2 - (u1 * (u1**2 + u2**2))
     du2dt = u1 + (pars * u2) - (u2 * (u1**2 + u2 ** 2))
     return np.array([du1dt, du2dt])
+
+def hopf_bif_pc(x0, pars):
+    """
+    Returns the predator-prey phase condition of dx/dt(0) = 0.
+
+    :param x0: The initial condition for the ODE system.
+    :param *pars: Additional arguments to pass to the predator-prey funtion.
+
+    :returns: The phase condition of the predator-prey system.
+    """
+    return hopf_bif(x0, 0, pars)[0]
 
 def cubic(x, pars):
     """

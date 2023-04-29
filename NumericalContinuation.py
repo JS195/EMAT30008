@@ -1,11 +1,12 @@
 import numpy as np
+import warnings
 from scipy.optimize import fsolve
 import matplotlib.pyplot as plt
 from NumericalShooting import find_shoot_orbit
 from scipy.optimize import root
 from ExampleFunctions import hopf_bif, hopf_bif_pc, cubic
 
-def natural_continuation(f, u0, min_par, max_par, no_steps, phase_cond = 'None', discretisation = 'shooting'):
+def natural_continuation(f, u0, min_par, max_par, no_steps, phase_cond = None, discretisation = 'shooting'):
     """
     Computes and plots the natural continuation of a system of ODEs as a function of a parameter.
 
@@ -22,29 +23,37 @@ def natural_continuation(f, u0, min_par, max_par, no_steps, phase_cond = 'None',
     sol_list = []
     #Generate list of parameter values
     par_list = np.linspace(min_par, max_par, no_steps)
-    if phase_cond != 'None':
+    if phase_cond != None:
         if discretisation == 'shooting':
             for par in par_list:
                 # find the periodic orbit for each parameter value
-                sol = find_shoot_orbit(f, phase_cond, u0, par) 
+                try: 
+                    sol = find_shoot_orbit(f, phase_cond, u0, par)
+                # Catch exceptions and continue the loop.
+                except Exception as e:
+                    warnings.warn(f"Error encountered in find_shoot_orbit for par={par}: {e}")
+                    continue
                 sol_list.append(sol)
         return np.array(sol_list), par_list
     else: # No phase condition specified
         for par in par_list:
             # solve for the equilibrium solution for each parameter value
-            sol = fsolve(f, u0, args=(par,))
+            try:
+                sol = fsolve(f, u0, args=(par,))
+            # Catch exceptions and continue the loop.
+            except Exception as e:
+                warnings.warn(f"Error encountered in fsolve for par={par}: {e}")
+                continue
             sol_list.append(sol)
             u0 = sol # Ensures convergence
     return np.array(sol_list), par_list
 
 def main():
-    results, pars = natural_continuation(hopf_bif, [1.2, 1.0, 4], -1, 4, 30, hopf_bif_pc)
-    norm_np_sol_list = np.linalg.norm(results[:, :-1], axis = 1)
-    plt.plot(pars, results[:,0], 'bx-')
-    plt.plot(pars,results[:,1],'rx-')
-    plt.plot(pars, norm_np_sol_list, 'rx')
+    results, pars = natural_continuation(hopf_bif, [1.2, 1.0, 4], -1, 3, 20, hopf_bif_pc)
+    plt.plot(pars, results[:,0], 'bx')
+    plt.plot(pars,results[:,1],'rx')
     plt.xlabel('beta value')
-    plt.ylabel('||x||')
+    plt.ylabel('pars')
     plt.show()
 
     results, pars = natural_continuation(cubic, 0, -2, 2, 30)
