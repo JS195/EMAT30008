@@ -80,7 +80,7 @@ def robin(N, alpha, beta, dx, RobinArgs):
     A[-1, -1] = k_b + h_b * dx
     return A
 
-def source_function(N, integer, x_int=0, u=0, x_dependant=False, u_dependant=False):
+def source_function(N, integer, x_int=None, u=None, x_dependant=False, u_dependant=False):
     """
     Creates a source function for a PDE that is either a constant, dependant on x, or 
     dependant on the solution of the PDE.
@@ -95,14 +95,18 @@ def source_function(N, integer, x_int=0, u=0, x_dependant=False, u_dependant=Fal
 
     :returns: An array corresponding to the source function.    
     """
+    # Check that if dependant on x or u, x or u is provided
+    if x_dependant and x_int is None:
+        raise ValueError("x_int must be provided when x_dependant is True.")
+    if u_dependant and u is None:
+        raise ValueError("u must be provided when u_dependant is True.")
+
     if x_dependant:
         q = x_int*integer
     else:
         q = np.ones((N-1),)*integer
-
     if u_dependant:
         q *= (u + integer)
-
     return q
 
 def finite_grid(N, a, b):
@@ -145,7 +149,6 @@ def Matrix_solver(N, A_matrix, dx, x_int, b_matrix, x_dependant=False, integer=1
     # Set up b if there is a source term
     if source:
         b_matrix -= ((dx)**2) * source_function(N, integer, x_int, x_dependant)
-    
     #Solve system
     u = np.linalg.solve(A_matrix, b_matrix)
     return u, x_int

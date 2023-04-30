@@ -115,10 +115,11 @@ def error_difference(f, x0, t0, t1, true_solution, pars):
         eulererror.append(error1)
 
     #Plot the output graph
-    plt.loglog(timestep, rk4error, 'bx-')
-    plt.loglog(timestep, eulererror, 'rx-')
-    plt.xlabel('Time step')
-    plt.ylabel('Error')
+    plt.loglog(timestep, rk4error, 'bx-', label='RK4 error')
+    plt.loglog(timestep, eulererror, 'rx-', label='Euler error')
+    plt.xlabel('Time step size')
+    plt.ylabel('Absolute error')
+    plt.legend()
     plt.show()
 
 def plot_different_parameters(f, x0, t0, t1, dt_max, params, solver='rk4'):
@@ -148,6 +149,12 @@ def plot_different_parameters(f, x0, t0, t1, dt_max, params, solver='rk4'):
 
     plt.subplots_adjust(wspace=0.3)
     plt.show()
+
+def plotter(x, y, xlabel, ylabel, title, ax):
+    ax.plot(x, y)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
 
 def main():
     pars = 1
