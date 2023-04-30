@@ -2,8 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import warnings
 from scipy.optimize import fsolve
-from ExampleFunctions import predator_prey, pred_prey_pc, hopf, hopf_pc, three_dim_hopf, three_dim_hopf_pc
-from ODEsolver import solve_odes, plot_different_parameters
+from ExampleFunctions import predator_prey, pred_prey_pc, hopf, hopf_pc, three_dim_hopf, three_dim_hopf_pc, standard_pc
+from ODEsolver import solve_odes, plot_different_parameters, plotter
+from scipy.spatial.distance import sqeuclidean
 
 def plot_phase_portrait(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.01, solver='rk4', **kwargs):
     """
@@ -20,52 +21,34 @@ def plot_phase_portrait(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.0
     :returns: None, but produces a plot of the phase portrait.
     """
     sol, t = solve_odes(func, x0=x0, t0=t0, t1=t1, dt_max=dt_max, solver=solver, **kwargs)
-    plt.plot(sol[:,0], sol[:,1])
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.title('Predator-Prey Phase Portrait')
+    fig, ax = plt.subplots()
+    plotter(sol[:, 0], sol[:, 1], 'x', 'y', 'Predator-Prey Phase Portrait', ax)
     plt.show()
 
 def iso_orbit(f, x0, t0, t1, dt_max, atol=1e-4, **kwargs):
-    """
-    Finds the limit cycle initial conditions and time period for a system of ODEs using the Runge-Kutta 
-    4th order solver.
-
-    :param f: Function defining a system of ODEs.
-    :param x0: Starting value of the dependent variable(s).
-    :param t0: Starting time value.
-    :param t1: Final time value.
-    :param dt_max: Maximum step size.
-    :param **kwargs: Optional. Any additional input keyword arguments.
-    
-    :returns: A list containing the initial conditions, and the time period of the limit cycle, if 
-    one exists. If no limit cycle is found, returns None.
-    """
     # Some ValueErrors
     if dt_max <= 0:
         raise ValueError("dt_max must be greater than 0")
     if t1 <= t0:
         raise ValueError("t1 must be greater than t0")
-    if not isinstance(x0, (list, tuple, np.ndarray)) or len(x0) < 2:
-        raise ValueError("x0 must be a list, tuple, or numpy array with at least two elements")
+    if not isinstance(x0, (list, tuple, np.ndarray)):
+        raise ValueError("x0 must be a list, tuple, or numpy array")
 
-    # Solve ODE using rk4 method and extract x and y coordinates
+    # Solve ODE using rk4 method and extract the solution
     sol, t = solve_odes(f, x0, t0, t1, dt_max, 'rk4', **kwargs)
-    x_coords = sol[:, 0]
-    y_coords = sol[:, 1]
-
-    # Find the indices of the peaks in the x coordinates 
-    peak_indices = np.where((x_coords[1:-1] > x_coords[:-2]) & (x_coords[1:-1] > x_coords[2:]))[0] + 1
-
-    #Check for a limit cycle
+    # Find the indices of the peaks in the first coordinate
+    peak_indices = np.where((sol[1:-1, 0] > sol[:-2, 0]) & (sol[1:-1, 0] > sol[2:, 0]))[0] + 1
+    # Check for a limit cycle
     for i in range(1, len(peak_indices)):
-        if np.isclose(x_coords[peak_indices[i]], x_coords[peak_indices[i - 1]], atol):
-            #Calculate time period of limit cycle
+        # Calculate the Euclidean distance between consecutive peaks
+        distance = sqeuclidean(sol[peak_indices[i]], sol[peak_indices[i - 1]])
+        if np.isclose(distance, 0, atol=atol):
+            # Calculate time period of limit cycle
             period = t[peak_indices[i]] - t[peak_indices[i - 1]]
-            # Store ICs and time period ina  list
-            orbit_info = [x_coords[peak_indices[i]], y_coords[peak_indices[i]], period]
+            # Store the n-dimensional state and time period in a list
+            orbit_info = list(sol[peak_indices[i]]) + [period]
             return orbit_info
-    
+
     # If no limit cycle is found, raise a warning and return None
     warnings.warn("No limit cycle found within the given absolute tolerance", UserWarning)
     return None
@@ -98,7 +81,7 @@ def shooting(f, phase_cond):
         sol, t = solve_odes(f, x0=u0, t0=0, t1=T, dt_max=0.01, solver='rk4', pars=pars)
         final_sol = sol[-1, :]
         # Calculate differences between actual and estimates
-        return np.append(u0 - final_sol, phase_cond(u0, pars=pars))
+        return np.append(u0 - final_sol, phase_cond(f, u0, pars=pars))
 
     return G
 
@@ -134,7 +117,7 @@ def main():
     #Predator Prey shooting/ root finding
     # Using the true values from before to provide an initial guess
     u0T = [0.6, 0.3, 20]
-    shooting_orbit = find_shoot_orbit(predator_prey, pred_prey_pc, u0T, pars)
+    shooting_orbit = find_shoot_orbit(predator_prey, standard_pc, u0T, pars)
     print('The shooting values of the predator prey orbit: ', shooting_orbit)
 
     #Testing the shooting code using the supercritical Hopf bifurcation
@@ -144,7 +127,7 @@ def main():
 
     # Using the true values from before to provide an initial guess
     u0T = [0.6, 0.001, 6]
-    shooting_orbit = find_shoot_orbit(hopf, hopf_pc, u0T, pars)
+    shooting_orbit = find_shoot_orbit(hopf, standard_pc, u0T, pars)
     print('The shooting values of the hopf orbit: ', shooting_orbit)
 
     #Testing the shooting code using the three dimensional hopf system
@@ -154,7 +137,7 @@ def main():
 
     # Using the true values from before to provide an initial guess
     u0T = [0.6, 0.001, 0.001, 6]
-    shooting_orbit = find_shoot_orbit(three_dim_hopf, three_dim_hopf_pc, u0T, pars)
+    shooting_orbit = find_shoot_orbit(three_dim_hopf, standard_pc, u0T, pars)
     print('The shooting values of the three dim hopf orbit: ', shooting_orbit)
 
 
