@@ -53,17 +53,6 @@ def predator_prey(X, t, pars):
     dydt = b * y * (1 - (y / x))
     return np.array([dxdt, dydt])
 
-def pred_prey_pc(x0, pars):
-    """
-    Returns the predator-prey phase condition of dx/dt(0) = 0.
-
-    :param x0: The initial condition for the ODE system.
-    :param pars: Additional arguments to pass to the predator-prey funtion.
-
-    :returns: The phase condition of the predator-prey system.
-    """
-    return predator_prey(x0, 0, pars)[0]
-
 def hopf(U, t, pars):
     """
     Defines the predator-prey equations.
@@ -80,17 +69,6 @@ def hopf(U, t, pars):
     du1dt = beta * u1 -u2 + sigma*u1*(u1**2 + u2**2)
     du2dt = u1 + beta*u2 + sigma*u2*(u1**2 + u2**2)
     return np.array([du1dt, du2dt])
-
-def hopf_pc(x0, pars):
-    """
-    Returns the predator-prey phase condition of dx/dt(0) = 0.
-
-    :param x0: The initial condition for the ODE system.
-    :param *pars: Additional arguments to pass to the predator-prey funtion.
-
-    :returns: The phase condition of the predator-prey system.
-    """
-    return hopf(x0, 0, pars)[0]
 
 def three_dim_hopf(U, t, pars):
     """
@@ -109,17 +87,6 @@ def three_dim_hopf(U, t, pars):
     du3dt = -u3
     return np.array([du1dt, du2dt, du3dt])
 
-def three_dim_hopf_pc(x0, pars):
-    """
-    Returns the predator-prey phase condition of dx/dt(0) = 0.
-
-    :param x0: The initial condition for the ODE system.
-    :param *pars: Additional arguments to pass to the predator-prey funtion.
-
-    :returns: The phase condition of the predator-prey system.
-    """
-    return three_dim_hopf(x0, 0, pars)[0]
-
 def hopf_bif(X, t, pars):
     """
     Returns the predator-prey phase condition of dx/dt(0) = 0 for a 3D system.
@@ -133,17 +100,6 @@ def hopf_bif(X, t, pars):
     du1dt = (pars * u1) - u2 - (u1 * (u1**2 + u2**2))
     du2dt = u1 + (pars * u2) - (u2 * (u1**2 + u2 ** 2))
     return np.array([du1dt, du2dt])
-
-def hopf_bif_pc(x0, pars):
-    """
-    Returns the predator-prey phase condition of dx/dt(0) = 0.
-
-    :param x0: The initial condition for the ODE system.
-    :param *pars: Additional arguments to pass to the predator-prey funtion.
-
-    :returns: The phase condition of the predator-prey system.
-    """
-    return hopf_bif(x0, 0, pars)[0]
 
 def cubic(x, pars):
     """
@@ -247,3 +203,15 @@ def true_sol_func(N, D, a, b, t, N_time, x_int):
     for n in range(0, N_time):
         u_true[n,:] = np.exp(-(b-a)**2*D*np.pi**2*t[n]) * np.sin(np.pi*(x_int-a)/(b-a))
     return u_true
+
+def standard_pc(f, x0, pars):
+    """
+    Returns the phase condition dx/dt(0) = 0.
+
+    :param f: The function.
+    :param x0: The initial condition for the ODE system.
+    :param *pars: Additional arguments to pass to the function.
+
+    :returns: The phase condition of the system.
+    """
+    return f(x0, 0, pars)[0]

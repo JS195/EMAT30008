@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import warnings
 from scipy.optimize import fsolve
-from ExampleFunctions import predator_prey, pred_prey_pc, hopf, hopf_pc, three_dim_hopf, three_dim_hopf_pc, standard_pc
+from ExampleFunctions import predator_prey, hopf, three_dim_hopf, standard_pc
 from ODEsolver import solve_odes, plot_different_parameters, plotter
 from scipy.spatial.distance import sqeuclidean
 
@@ -26,6 +26,20 @@ def plot_phase_portrait(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.0
     plt.show()
 
 def iso_orbit(f, x0, t0, t1, dt_max, atol=1e-4, **kwargs):
+    """
+    Finds the limit cycle initial conditions and time period for a system of ODEs using the Runge-Kutta 
+    4th order solver.
+
+    :param f: Function defining a system of ODEs.
+    :param x0: Starting value of the dependent variable(s).
+    :param t0: Starting time value.
+    :param t1: Final time value.
+    :param dt_max: Maximum step size.
+    :param **kwargs: Optional. Any additional input keyword arguments.
+    
+    :returns: A list containing the initial conditions, and the time period of the limit cycle, if 
+    one exists. If no limit cycle is found, returns None.
+    """    
     # Some ValueErrors
     if dt_max <= 0:
         raise ValueError("dt_max must be greater than 0")
@@ -85,7 +99,7 @@ def shooting(f, phase_cond):
 
     return G
 
-def find_shoot_orbit(f, phase_cond, u0T, pars):
+def find_shoot_orbit(f, u0T, pars, phase_cond=standard_pc):
     """
     Finds the periodic orbit of a dynamical system using the shooting method.
 
@@ -102,6 +116,37 @@ def find_shoot_orbit(f, phase_cond, u0T, pars):
     orbit = fsolve(lambda u0T: G(u0T[:-1], u0T[-1], pars), u0T)
     return orbit
 
+def code_testing(func, x0, pars, u0T, atol=1e-2):
+    """
+    Tests the accuracy of the shooting method for finding periodic orbits by comparing the 
+    results with the iso_orbit.
+
+    :param func: The function defining the dynamical system.
+    :param pars: Parameters for the dynamical system.
+    :param atol: The desired tolerance, defaults to 1e-2.
+
+    :returns: None, but prints "Test Passed" if the difference between the computed orbits is
+              below the tolerance or "Test Failed" if the difference is above the tolerance.
+    """
+    orbit = iso_orbit(func, x0, 0, 200, 0.01, pars=pars)
+    # Using the true values from before to provide an initial guess
+    u0T = [orbit]
+    shooting_orbit = find_shoot_orbit(func, u0T, pars)
+
+    # Ensure both arrays have the same length
+    if len(orbit) != len(shooting_orbit):
+        print('Error: length mismatch between orbit and shooting_orbit.')
+
+    test_passed = True  # Initialize the flag variable as True
+    for i in range(len(shooting_orbit)):
+        result = abs(orbit[i]-shooting_orbit[i])
+        if result > atol:
+            test_passed = False  # Update the flag variable to False if a comparison fails
+    if test_passed:
+        print("Test Passed")
+    else:
+        print("Test Failed")
+
 def main():
     params = [[1.0, 0.1, 0.1], [1.0, 0.25, 0.1], [1.0, 0.4, 0.1]]
     plot_different_parameters(predator_prey, x0=[1,1], t0=0, t1=200, dt_max=0.01, params=params)
@@ -116,8 +161,8 @@ def main():
 
     #Predator Prey shooting/ root finding
     # Using the true values from before to provide an initial guess
-    u0T = [0.6, 0.3, 20]
-    shooting_orbit = find_shoot_orbit(predator_prey, standard_pc, u0T, pars)
+    u0T = orbit
+    shooting_orbit = find_shoot_orbit(predator_prey, u0T, pars)
     print('The shooting values of the predator prey orbit: ', shooting_orbit)
 
     #Testing the shooting code using the supercritical Hopf bifurcation
@@ -127,7 +172,7 @@ def main():
 
     # Using the true values from before to provide an initial guess
     u0T = [0.6, 0.001, 6]
-    shooting_orbit = find_shoot_orbit(hopf, standard_pc, u0T, pars)
+    shooting_orbit = find_shoot_orbit(hopf, u0T, pars)
     print('The shooting values of the hopf orbit: ', shooting_orbit)
 
     #Testing the shooting code using the three dimensional hopf system
@@ -137,7 +182,7 @@ def main():
 
     # Using the true values from before to provide an initial guess
     u0T = [0.6, 0.001, 0.001, 6]
-    shooting_orbit = find_shoot_orbit(three_dim_hopf, standard_pc, u0T, pars)
+    shooting_orbit = find_shoot_orbit(three_dim_hopf, u0T, pars)
     print('The shooting values of the three dim hopf orbit: ', shooting_orbit)
 
 

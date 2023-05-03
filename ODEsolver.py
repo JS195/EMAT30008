@@ -122,6 +122,24 @@ def error_difference(f, x0, t0, t1, true_solution, pars):
     plt.legend()
     plt.show()
 
+def plotter(x, y, xlabel, ylabel, title, ax):
+    """
+    Plots the given data with specified labels and title on the provided axis.
+
+    :param x: Array-like data for the x-axis.
+    :param y: Array-like data for the y-axis.
+    :param xlabel: String, label for the x-axis.
+    :param ylabel: String, label for the y-axis.
+    :param title: String, title for the plot.
+    :param ax: Matplotlib axes object on which the plot will be drawn.
+
+    :returns: None (modifies the provided axes object with the plot and labels).
+    """
+    ax.plot(x, y)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+
 def plot_different_parameters(f, x0, t0, t1, dt_max, params, solver='rk4'):
     """
     Plots the solution of a system of ODEs for different parameter values using a specified solver.
@@ -140,21 +158,12 @@ def plot_different_parameters(f, x0, t0, t1, dt_max, params, solver='rk4'):
     fig, axs = plt.subplots(1, len(params), figsize=(12, 4))
     for i, p in enumerate(params):
         sol, t = solve_odes(f, x0, t0, t1, dt_max, solver, pars=p)
-        axs[i].plot(t, sol[:, 0], label='Prey')
-        axs[i].plot(t, sol[:, 1], label='Predator')
-        axs[i].set_xlabel('Time')
-        axs[i].set_ylabel('Population')
-        axs[i].set_title('Parameters: {}'.format(p))
-        axs[i].legend()
-
+        plotter(t, sol[:, 0], 'Time', 'Population', f"Prey - Parameters: {p}", axs[i])
+        plotter(t, sol[:, 1], 'Time', 'Population', f"Predator - Parameters: {p}", axs[i])
+        
+        axs[i].legend(['Prey', 'Predator'])
     plt.subplots_adjust(wspace=0.3)
     plt.show()
-
-def plotter(x, y, xlabel, ylabel, title, ax):
-    ax.plot(x, y)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-    ax.set_title(title)
 
 def main():
     pars = 1
