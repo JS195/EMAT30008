@@ -22,7 +22,7 @@ def plot_phase_portrait(func=predator_prey,  x0=[1, 1], t0=0, t1=200, dt_max=0.0
     """
     sol, t = solve_odes(func, x0=x0, t0=t0, t1=t1, dt_max=dt_max, solver=solver, **kwargs)
     fig, ax = plt.subplots()
-    plotter(sol[:, 0], sol[:, 1], 'x', 'y', 'Predator-Prey Phase Portrait', ax)
+    plotter(sol[:, 0], sol[:, 1], '-', 'x', 'y', 'Predator-Prey Phase Portrait', ax)
     plt.show()
 
 def iso_orbit(f, x0, t0, t1, dt_max, atol=1e-4, **kwargs):

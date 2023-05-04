@@ -122,7 +122,7 @@ def error_difference(f, x0, t0, t1, true_solution, pars):
     plt.legend()
     plt.show()
 
-def plotter(x, y, xlabel, ylabel, title, ax):
+def plotter(x, y, linestyle, xlabel, ylabel, title, ax):
     """
     Plots the given data with specified labels and title on the provided axis.
 
@@ -135,7 +135,7 @@ def plotter(x, y, xlabel, ylabel, title, ax):
 
     :returns: None (modifies the provided axes object with the plot and labels).
     """
-    ax.plot(x, y)
+    ax.plot(x, y, linestyle)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
@@ -158,8 +158,8 @@ def plot_different_parameters(f, x0, t0, t1, dt_max, params, solver='rk4'):
     fig, axs = plt.subplots(1, len(params), figsize=(12, 4))
     for i, p in enumerate(params):
         sol, t = solve_odes(f, x0, t0, t1, dt_max, solver, pars=p)
-        plotter(t, sol[:, 0], 'Time', 'Population', f"Prey - Parameters: {p}", axs[i])
-        plotter(t, sol[:, 1], 'Time', 'Population', f"Predator - Parameters: {p}", axs[i])
+        plotter(t, sol[:, 0], '-', 'Time', 'Population', f"Prey - Parameters: {p}", axs[i])
+        plotter(t, sol[:, 1], '-', 'Time', 'Population', f"Predator - Parameters: {p}", axs[i])
         
         axs[i].legend(['Prey', 'Predator'])
     plt.subplots_adjust(wspace=0.3)

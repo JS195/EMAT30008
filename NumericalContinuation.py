@@ -3,8 +3,8 @@ import warnings
 from scipy.optimize import fsolve
 import matplotlib.pyplot as plt
 from NumericalShooting import find_shoot_orbit
-from scipy.optimize import root
-from ExampleFunctions import hopf_bif, hopf_bif_pc, cubic
+from ExampleFunctions import hopf_bif, standard_pc, cubic
+from ODEsolver import plotter
 
 def natural_continuation(f, u0, min_par, max_par, no_steps, phase_cond = None, discretisation = 'shooting'):
     """
@@ -28,7 +28,7 @@ def natural_continuation(f, u0, min_par, max_par, no_steps, phase_cond = None, d
             for par in par_list:
                 # find the periodic orbit for each parameter value
                 try: 
-                    sol = find_shoot_orbit(f, phase_cond, u0, par)
+                    sol = find_shoot_orbit(f, u0, par, phase_cond)
                 # Catch exceptions and continue the loop.
                 except Exception as e:
                     warnings.warn(f"Error encountered in find_shoot_orbit for par={par}: {e}")
@@ -49,17 +49,15 @@ def natural_continuation(f, u0, min_par, max_par, no_steps, phase_cond = None, d
     return np.array(sol_list), par_list
 
 def main():
-    results, pars = natural_continuation(hopf_bif, [1.2, 1.0, 4], -1, 3, 20, hopf_bif_pc)
-    plt.plot(pars, results[:,0], 'bx')
-    plt.plot(pars,results[:,1],'rx')
-    plt.xlabel('beta value')
-    plt.ylabel('pars')
+    results, pars = natural_continuation(hopf_bif, [1.2, 1.0, 4], -1, 3, 6, standard_pc)
+    fig, ax = plt.subplots()
+    plotter(pars, results[:,0], 'bx', "Parameter Value", "Solution", "Natural Parameter Continuation of Hopf Bifurcation Equation", ax)
+    plotter(pars, results[:,1], 'rx-', "Parameter Value", "Solution", "Natural Parameter Continuation of Hopf Bifurcation Equation", ax)
     plt.show()
 
     results, pars = natural_continuation(cubic, 0, -2, 2, 30)
-    plt.plot(-pars, -results)
-    plt.xlabel('c')
-    plt.ylabel('x')
+    fig1, ax1 = plt.subplots()
+    plotter(pars, results, '-', "Parameter Value", "Solution", "Natural Parameter Continuation of Cubic Equation", ax1)
     plt.show()
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from ExampleFunctions import true_sol, true_ans_part2
+from ExampleFunctions import true_sol, BVP_true_answer
 
 def matrix_build(N,D):
     """
@@ -106,7 +106,7 @@ def source_function(N, integer, x_int=None, u=None, x_dependant=False, u_dependa
     else:
         q = np.ones((N-1),)*integer
     if u_dependant:
-        q *= (u + integer)
+        q *= (u+integer)
     return q
 
 def finite_grid(N, a, b):
@@ -175,11 +175,14 @@ def Iterative_solver(N, A_matrix, dx, x_int, b_matrix, integer, source, x_depend
     :returns: A tuple (u, x_int) where u is an (N-1) column vector that represents the solution x of the linear system Ax=b
               and x_int is the integer value used to create the source function.
     """
-    # Initlaise solution vector u
+    # Initialize solution vector u
     u = np.zeros(N-1)
     # Initialize u_prev as an array of infinities with length N-1
     u_prev = np.ones(N-1) * np.inf
     iter_count = 0 # Set iteration count to 0
+
+    D_inv = np.diag(1/np.diag(A_matrix))  # Inverse of the diagonal of A_matrix
+    R = A_matrix - np.diag(np.diag(A_matrix))  # Residual matrix
 
     while np.linalg.norm(u - u_prev) > tol and iter_count < max_iter:
         u_prev = u.copy() # Copy the values of u into u_prev
@@ -187,14 +190,15 @@ def Iterative_solver(N, A_matrix, dx, x_int, b_matrix, integer, source, x_depend
         # Update matrix system for source function and solve
         if source:
             b_matrix_updated = b_matrix - ((dx)**2) * source_function(N, integer, x_int, u, x_dependant, u_dependant)
-            u = np.linalg.solve(A_matrix, b_matrix_updated)
+            u = np.dot(D_inv, (b_matrix_updated - np.dot(R, u_prev)))
         else:
-            u = np.linalg.solve(A_matrix, b_matrix)
+            u = np.dot(D_inv, (b_matrix - np.dot(R, u_prev)))
 
         iter_count += 1
     if iter_count == max_iter:
         print("Warning: Maximum number of iterations reached. Solution may not have converged.")
     return(u, x_int)
+
 
 def BVP_solver(N, a, b, gamma1, gamma2, D, integer=1, source=None, boundary="dirichlet", RobinArgs=None, x_dependant=False, u_dependant=False, tol=1e-6, max_iter=100):
     """
@@ -259,7 +263,7 @@ def main():
 
     # Part 2
     x_ans2, x_int2 = BVP_solver(N=50, a=0, b=1, gamma1=0, gamma2=0, D=1, integer=1, source=True, boundary="dirichlet", x_dependant=False)
-    u_ans2 = true_ans_part2(x_int2, a=0, b=1, alpha=0, beta=0, D=1, integer=1)
+    u_ans2 = BVP_true_answer(x_int2, a=0, b=1, alpha=0, beta=0, D=1, integer=1)
     plt.plot(x_int2, x_ans2, 'o', label="Numerical")
     plt.plot(x_int2, u_ans2, 'k', label='Exact')
     plt.legend()

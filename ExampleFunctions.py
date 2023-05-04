@@ -168,7 +168,7 @@ def true_sol(x,a,b,alpha,beta, D):
     answer = ((beta - alpha)/(b - a))*(x - a) + alpha
     return np.array(answer)
 
-def true_ans_part2(x,a,b,alpha,beta, D, integer):
+def BVP_true_answer(x,a,b,alpha,beta, D, integer):
     """
     Computes the true solution for a linear ODE problem.
 
