@@ -1,4 +1,4 @@
-# Project Name: ODE and PDE solver library
+# ODE and PDE solver library
 A library for solving Ordinary Differential Equations (ODEs) and Partial Differential Equations (PDEs) using various numerical methods.
 
 ## Setup
@@ -20,9 +20,10 @@ The following libraries and dependencies are required to run this project:
 ## Usage
 1. Choose the appropriate solver function based on your problem type.
 2. Specify the equations, initial/boundary conditions, and integration parameters.
-3. Obtain and analyze the numerical solutions. Customize functions for specific problem domains.
+3. Obtain and analyse the numerical solutions. Customise functions for specific problem domains.
 
-# Further descriptions of the files
+
+# Further Description of the Files
 
 ## Example Functions
 Various useful functions to test the code with. Your own functions can also be specified. 
