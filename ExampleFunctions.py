@@ -127,7 +127,7 @@ def linear_diffusion_IC1(x_values, a, b):
     """
     return np.sin(np.pi*(x_values-a)/(b-a))
 
-def linear_diffusion_IC2(x_values):
+def linear_diffusion_IC2(x_values, a, b):
     """
     Computes the initial condition for a linear diffusion problem.
 
@@ -184,25 +184,6 @@ def BVP_true_answer(x,a,b,alpha,beta, D, integer):
     """    
     answer = (-integer)/(2*D)*((x-a)*(x-b)) + ((beta-alpha)/(b-a))*(x-a)+alpha
     return np.array(answer)
-
-def true_sol_func(N, D, a, b, t, N_time, x_int):
-    """
-    Computes the true solution for a linear diffusion problem.
-
-    :param N: The number of spatial grid points.
-    :param D: The diffusion coefficient.
-    :param a: The left endpoint of the spatial domain.
-    :param b: The right endpoint of the spatial domain.
-    :param t: A numpy array containing the time grid points.
-    :param N_time: The number of time steps.
-    :param x_int: A tuple containing the spatial domain interval.
-
-    :returns: A numpy array of shape (N_time+1, N-1) containing the true solution of the linear diffusion problem.
-    """
-    u_true = np.zeros((N_time+1, N-1))
-    for n in range(0, N_time):
-        u_true[n,:] = np.exp(-(b-a)**2*D*np.pi**2*t[n]) * np.sin(np.pi*(x_int-a)/(b-a))
-    return u_true
 
 def standard_pc(f, x0, pars):
     """
