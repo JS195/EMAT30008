@@ -89,12 +89,13 @@ def three_dim_hopf(U, t, pars):
 
 def hopf_bif(X, t, pars):
     """
-    Returns the predator-prey phase condition of dx/dt(0) = 0 for a 3D system.
+    Returns the time derivative of a 2D predator-prey system at a given time.
 
-    :param x0: The initial condition for the ODE system.
-    :param pars: A tuple containing the system parameters (beta, sigma).
+    :param U: A numpy array of length 2 containing the state variables (u1, u2).
+    :param t: The time.
+    :param pars: A tuple containing the system parameters (beta).
 
-    :returns: The phase condition of the predator-prey system.
+    :returns: A numpy array of length 2 containing the time derivatives of the state variables.
     """
     (u1, u2) = X
     du1dt = (pars * u1) - u2 - (u1 * (u1**2 + u2**2))
@@ -199,12 +200,13 @@ def standard_pc(f, x0, pars):
 
 def modified_hopf(X, t, pars):
     """
-    Returns the predator-prey phase condition of dx/dt(0) = 0 for a 3D system.
+    Returns the time derivative of a 2D predator-prey system at a given time.
 
-    :param x0: The initial condition for the ODE system.
-    :param pars: A tuple containing the system parameters (beta, sigma).
+    :param U: A numpy array of length 2 containing the state variables (u1, u2).
+    :param t: The time.
+    :param pars: A tuple containing the system parameters (beta).
 
-    :returns: The phase condition of the predator-prey system.
+    :returns: A numpy array of length 2 containing the time derivatives of the state variables.
     """
     (u1, u2) = X
     du1dt = (pars * u1) - u2 + u1 * (u1**2 + u2**2) - (u1 * (u1**2 + u2**2)**2)
