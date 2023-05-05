@@ -3,7 +3,7 @@ import warnings
 from scipy.optimize import fsolve
 import matplotlib.pyplot as plt
 from NumericalShooting import find_shoot_orbit
-from ExampleFunctions import hopf_bif, standard_pc, cubic
+from ExampleFunctions import hopf_bif, standard_pc, cubic, modified_hopf
 from ODEsolver import plotter
 
 def natural_continuation(f, u0, min_par, max_par, no_steps, phase_cond = None, discretisation = 'shooting'):
@@ -49,11 +49,11 @@ def natural_continuation(f, u0, min_par, max_par, no_steps, phase_cond = None, d
     return np.array(sol_list), par_list
 
 def main():
-    results, pars = natural_continuation(hopf_bif, [1.2, 1.0, 4], -1, 3, 6, standard_pc)
+    results, pars = natural_continuation(modified_hopf, [1.2, 1.0, 4], -2, 4, 15, standard_pc)
     fig, ax = plt.subplots()
     plotter(pars, results[:,0], 'bx', "Parameter Value", "Solution", "Natural Parameter Continuation of Hopf Bifurcation Equation", ax)
     plotter(pars, -results[:,0], 'bx', "Parameter Value", "Solution", "Natural Parameter Continuation of Hopf Bifurcation Equation", ax)
-    plotter(pars, results[:,1], 'rx-', "Parameter Value", "Solution", "Natural Parameter Continuation of Hopf Bifurcation Equation", ax)
+    plotter(pars, results[:,1], 'rx', "Parameter Value", "Solution", "Natural Parameter Continuation of Hopf Bifurcation Equation", ax)
     plt.show()
 
     results, pars = natural_continuation(cubic, 0, -2, 2, 30)

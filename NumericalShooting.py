@@ -143,9 +143,9 @@ def code_testing(func, x0, pars, u0T, atol=1e-2):
         if result > atol:
             test_passed = False  # Update the flag variable to False if a comparison fails
     if test_passed:
-        print("At ", atol, " Test Passed")
+        print("At ", atol, " atol: Test Passed")
     else:
-        print("At ", atol, " Test Failed")
+        print("At ", atol, " atol: Test Failed")
 
 def main():
     params = [[1.0, 0.1, 0.1], [1.0, 0.25, 0.1], [1.0, 0.4, 0.1]]

@@ -196,3 +196,17 @@ def standard_pc(f, x0, pars):
     :returns: The phase condition of the system.
     """
     return f(x0, 0, pars)[0]
+
+def modified_hopf(X, t, pars):
+    """
+    Returns the predator-prey phase condition of dx/dt(0) = 0 for a 3D system.
+
+    :param x0: The initial condition for the ODE system.
+    :param pars: A tuple containing the system parameters (beta, sigma).
+
+    :returns: The phase condition of the predator-prey system.
+    """
+    (u1, u2) = X
+    du1dt = (pars * u1) - u2 + u1 * (u1**2 + u2**2) - (u1 * (u1**2 + u2**2)**2)
+    du2dt = u1 + (pars * u2) + u2 * (u1**2 + u2 ** 2)- (u2 * (u1**2 + u2 ** 2)**2)
+    return np.array([du1dt, du2dt])
