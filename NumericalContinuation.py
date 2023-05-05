@@ -52,12 +52,13 @@ def main():
     results, pars = natural_continuation(hopf_bif, [1.2, 1.0, 4], -1, 3, 6, standard_pc)
     fig, ax = plt.subplots()
     plotter(pars, results[:,0], 'bx', "Parameter Value", "Solution", "Natural Parameter Continuation of Hopf Bifurcation Equation", ax)
+    plotter(pars, -results[:,0], 'bx', "Parameter Value", "Solution", "Natural Parameter Continuation of Hopf Bifurcation Equation", ax)
     plotter(pars, results[:,1], 'rx-', "Parameter Value", "Solution", "Natural Parameter Continuation of Hopf Bifurcation Equation", ax)
     plt.show()
 
     results, pars = natural_continuation(cubic, 0, -2, 2, 30)
     fig1, ax1 = plt.subplots()
-    plotter(pars, results, '-', "Parameter Value", "Solution", "Natural Parameter Continuation of Cubic Equation", ax1)
+    plotter(-pars, -results, '-', "Parameter Value", "Solution", "Natural Parameter Continuation of Cubic Equation", ax1)
     plt.show()
 
 if __name__ == "__main__":
